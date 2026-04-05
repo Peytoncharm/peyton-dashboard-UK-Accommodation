@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b0d12">
+<title>Peyton & Charmed Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{background:#0b0d12;color:#e6e8ef;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100%;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#98a0b8;font-size:14px;gap:12px}
+@keyframes flowAnim{to{stroke-dashoffset:-16}}
+@keyframes pulseGlow{0%,100%{opacity:1}50%{opacity:.35}}
+.flow-active{animation:flowAnim 1s linear infinite}
+.flow-wait{animation:pulseGlow 1.5s ease-in-out infinite}
+#loading .sp{width:28px;height:28px;border:3px solid #232839;border-top-color:#2dd4a0;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#err-box{display:none;padding:40px 20px;text-align:center;color:#f06060;font-size:13px}
+</style>
+</head>
+<body>
+<div id="loading"><div class="sp"></div><div>Loading Dashboard...</div></div>
+<div id="err-box"><div style="font-size:24px;margin-bottom:12px">⚠️</div><div style="font-weight:700">โหลดไม่สำเร็จ</div><div id="err-msg" style="color:#98a0b8;font-size:11px;margin-top:6px"></div></div>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script>window.addEventListener("error",function(e){document.getElementById("loading").style.display="none";document.getElementById("err-box").style.display="block";document.getElementById("err-msg").textContent=e.message||"Unknown error"});</script>
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+
+const G="#2dd4a0",A="#f5b731",R="#f06060",B="#5b9cf5",P="#9b7df5",PK="#e86fa0",OR="#f5993b",CY="#30d5e8";
+const S1="#13161f",S2="#1a1e2a",S3="#232839",B1="#2a3050",T1="#e6e8ef",T2="#98a0b8",T3="#5f6680";
+const rc=r=>r>=90?G:r>=70?A:R;
+const tc=s=>({success:G,fail:R,alert:A,in_progress:B,waiting_approval:OR,pending:A}[s]||T3);
+
+const STEP_CFG={
+  success:{icon:"✅",label:"สำเร็จ",color:G},
+  fail:{icon:"❌",label:"ล้มเหลว",color:R},
+  in_progress:{icon:"⏳",label:"กำลังดำเนินการ",color:B},
+  waiting_approval:{icon:"🔔",label:"รอทีม Approve",color:OR},
+  pending:{icon:"⏸️",label:"รอลูกค้าตอบ",color:A},
+};
+
+const AGENTS=[
+  {id:1,name:"Chatbot/Orchestrator",icon:"💬",status:"live",auto:95,calls:1847,rate:96.9,avgMs:320,errFreq:3.1,desc:"Routing + locked state"},
+  {id:2,name:"Intake",icon:"🎯",status:"live",auto:85,calls:423,rate:94.8,avgMs:1200,errFreq:5.2,desc:"รับ requirement → Zoho"},
+  {id:3,name:"Sale",icon:"💰",status:"live",auto:88,calls:312,rate:95.5,avgMs:890,errFreq:4.5,desc:"ปิดการขาย SA/PA"},
+  {id:4,name:"Search SA",icon:"🔍",status:"live",auto:78,calls:189,rate:82.5,avgMs:4500,errFreq:17.5,desc:"ค้นหา SA"},
+  {id:5,name:"Search PA",icon:"🔎",status:"live",auto:75,calls:134,rate:80.6,avgMs:6200,errFreq:19.4,desc:"Rightmove/Zoopla"},
+  {id:6,name:"Media",icon:"📸",status:"live",auto:80,calls:87,rate:90.8,avgMs:2100,errFreq:9.2,desc:"VDO/viewing"},
+  {id:7,name:"Viewing",icon:"🏠",status:"live",auto:83,calls:95,rate:90.5,avgMs:3800,errFreq:9.5,desc:"จัดนัด viewing"},
+  {id:8,name:"Offer PA",icon:"🤝",status:"wip",auto:60,calls:23,rate:78.3,avgMs:1500,errFreq:21.7,desc:"เจรจา offer"},
+  {id:9,name:"Booking",icon:"📋",status:"live",auto:85,calls:67,rate:94.0,avgMs:5100,errFreq:6.0,desc:"จองกับ provider"},
+  {id:10,name:"Invoice",icon:"🧾",status:"live",auto:89,calls:198,rate:93.9,avgMs:2800,errFreq:6.1,desc:"สร้าง invoice"},
+  {id:11,name:"Payment",icon:"💳",status:"live",auto:88,calls:156,rate:95.5,avgMs:3200,errFreq:4.5,desc:"ตรวจสลิป"},
+  {id:13,name:"Notify Hub",icon:"🔔",status:"live",auto:92,calls:534,rate:98.9,avgMs:450,errFreq:1.1,desc:"HUB อนุมัติ"},
+  {id:14,name:"Council Tax",icon:"🏛️",status:"live",auto:70,calls:45,rate:75.6,avgMs:18000,errFreq:24.4,desc:"7 councils"},
+  {id:15,name:"OVO Energy",icon:"⚡",status:"wip",auto:65,calls:38,rate:65.8,avgMs:22000,errFreq:34.2,desc:"OVO form"},
+  {id:16,name:"Octopus",icon:"🐙",status:"wip",auto:60,calls:29,rate:69.0,avgMs:19500,errFreq:31.0,desc:"Octopus form"},
+  {id:21,name:"After Sales",icon:"📝",status:"live",auto:80,calls:67,rate:91.0,avgMs:600,errFreq:9.0,desc:"post-booking"},
+  {id:29,name:"Audit",icon:"🔍",status:"live",auto:95,calls:4200,rate:99.5,avgMs:150,errFreq:0.5,desc:"จับ error"},
+  {id:30,name:"Debug",icon:"🛠️",status:"live",auto:90,calls:312,rate:89.1,avgMs:8500,errFreq:10.9,desc:"auto-fix"},
+];
+const AG=n=>AGENTS.find(a=>a.name===n);
+
+const CUSTOMERS=[
+  {id:"U3eea5b",name:"Aussanee S.",state:"OVO_FILLING",agent:"OVO Energy",city:"London",budget:"£1,800",moveIn:"Sep 2026",pkg:"PA £750",
+   journey:[
+     {agent:"Intake",st:"success",act:"บันทึก requirement เสร็จ",time:"02 Mar",note:null},
+     {agent:"Sale",st:"success",act:"PA £750 ชำระแล้ว",time:"02 Mar",note:null},
+     {agent:"Search PA",st:"success",act:"พบ 3 properties ตรง requirement",time:"15 Mar",note:null},
+     {agent:"Media",st:"success",act:"ส่ง VDO — ลูกค้าเลือก Flat 209",time:"18 Mar",note:null},
+     {agent:"Offer PA",st:"success",act:"Offer £1,800/month — agent ตอบรับ",time:"20 Mar",note:null},
+     {agent:"Invoice",st:"success",act:"Invoice #PC-2026-0072 ส่งแล้ว",time:"20 Mar",note:null},
+     {agent:"Payment",st:"success",act:"สลิป £750 ตรวจผ่าน",time:"21 Mar",note:null},
+     {agent:"Booking",st:"success",act:"จอง Flat 209 สำเร็จ",time:"25 Mar",note:null},
+     {agent:"After Sales",st:"success",act:"Route ไป Council + Energy",time:"25 Mar",note:null},
+     {agent:"Council Tax",st:"waiting_approval",act:"กรอก Islington form ครบ — หยุดที่ Declaration",time:"05 Apr 12:50",note:"รอทีมตรวจ screenshot แล้วพิมพ์ 'ยืนยัน council'"},
+     {agent:"OVO Energy",st:"in_progress",act:"กำลังกรอก OVO form — ติดที่ Step 3 Screenshot loop",time:"05 Apr 14:30",note:"Audit Agent ตรวจจับแล้ว — Debug กำลัง analyze"},
+  ]},
+  {id:"U6dba21",name:"Orathai-Test",state:"SEARCHING",agent:"Search SA",city:"London",budget:"£1,200",moveIn:"Sep 2026",pkg:"SA £250",
+   journey:[
+     {agent:"Intake",st:"success",act:"บันทึก requirement เสร็จ",time:"01 Apr",note:null},
+     {agent:"Sale",st:"success",act:"SA £250 เลือกแล้ว",time:"01 Apr",note:null},
+     {agent:"Search SA",st:"in_progress",act:"ค้นหา iQ King's Cross — timeout ครั้งที่ 2, Debug reset แล้ว กำลังค้นหาใหม่",time:"05 Apr 13:15",note:"Playwright retry อัตโนมัติ — รอผล"},
+  ]},
+  {id:"Ub7a9c3",name:"Nithikorn P.",state:"WAITING_PACKAGE",agent:"Sale",city:"London",budget:"£1,200",moveIn:"Sep 2026",pkg:"SA £250",
+   journey:[
+     {agent:"Intake",st:"success",act:"บันทึก requirement เสร็จ",time:"05 Apr 10:15",note:null},
+     {agent:"Sale",st:"pending",act:"ส่ง SA Package info แล้ว",time:"05 Apr 10:30",note:"รอลูกค้าตัดสินใจจ่าย £250"},
+  ]},
+  {id:"Uf4d3e2",name:"Piamsiri K.",state:"BOOKING_PENDING",agent:"Booking",city:"Bristol",budget:"£1,500",moveIn:"Oct 2026",pkg:"SA £250",
+   journey:[
+     {agent:"Intake",st:"success",act:"บันทึก requirement เสร็จ",time:"28 Mar",note:null},
+     {agent:"Sale",st:"success",act:"SA £250 ชำระแล้ว",time:"28 Mar",note:null},
+     {agent:"Search SA",st:"success",act:"พบ iQ Bristol",time:"30 Mar",note:null},
+     {agent:"Viewing",st:"success",act:"Virtual viewing ผ่าน WhatsApp",time:"01 Apr",note:null},
+     {agent:"Invoice",st:"success",act:"Invoice ส่งแล้ว",time:"05 Apr 12:30",note:null},
+     {agent:"Payment",st:"success",act:"สลิป £250 ตรวจผ่าน",time:"05 Apr 11:45",note:null},
+     {agent:"Booking",st:"waiting_approval",act:"ส่ง booking request ไป iQ Bristol แล้ว",time:"05 Apr 12:00",note:"รอทีมยืนยันกับ iQ ว่าห้องว่าง แล้วพิมพ์ 'OK' ใน Notify Group"},
+  ]},
+  {id:"Ua8c2f1",name:"Siriporn T.",state:"COUNCIL_FAILED",agent:"Council Tax",city:"London SE1",budget:"£1,600",moveIn:"Sep 2026",pkg:"PA £750",
+   journey:[
+     {agent:"Intake",st:"success",act:"บันทึก requirement เสร็จ",time:"01 Mar",note:null},
+     {agent:"Sale",st:"success",act:"PA £750 ชำระแล้ว",time:"01 Mar",note:null},
+     {agent:"Search PA",st:"success",act:"พบ Flat Bermondsey",time:"10 Mar",note:null},
+     {agent:"Invoice",st:"success",act:"Invoice ส่งแล้ว",time:"12 Mar",note:null},
+     {agent:"Payment",st:"success",act:"ตรวจสลิปผ่าน",time:"13 Mar",note:null},
+     {agent:"Booking",st:"success",act:"จองสำเร็จ",time:"18 Mar",note:null},
+     {agent:"After Sales",st:"success",act:"Route ไป Council Tax",time:"18 Mar",note:null},
+     {agent:"Council Tax",st:"fail",act:"Southwark form — Declaration page layout เปลี่ยน",time:"05 Apr 12:48",note:"ส่ง HANDOFF ไปทีมแล้ว — รอ dev แก้ selector ก่อนลองใหม่"},
+  ]},
+];
+
+const TASKS=[
+  {time:"14:35",agent:"Audit",action:"ตรวจจับ OVO screenshot loop",user:"U3eea5b",status:"alert"},
+  {time:"14:30",agent:"OVO Energy",action:"กรอกฟอร์ม Step 3 — screenshot ซ้ำ",user:"U3eea5b",status:"fail"},
+  {time:"13:20",agent:"Debug",action:"Auto-fix search timeout → reset",user:"U6dba21",status:"success"},
+  {time:"13:15",agent:"Search SA",action:"ค้นหา iQ King's Cross — timeout",user:"U6dba21",status:"fail"},
+  {time:"12:50",agent:"Notify Hub",action:"ส่งอนุมัติ Council Tax Islington",user:"U3eea5b",status:"success"},
+  {time:"12:48",agent:"Council Tax",action:"Southwark form — layout changed",user:"Ua8c2f1",status:"fail"},
+  {time:"12:30",agent:"Invoice",action:"Invoice #PC-2026-0089",user:"Uf4d3e2",status:"success"},
+  {time:"11:45",agent:"Payment",action:"ตรวจสลิป £250",user:"Uf4d3e2",status:"success"},
+  {time:"10:30",agent:"Intake",action:"บันทึก requirement",user:"Ub7a9c3",status:"success"},
+  {time:"08:15",agent:"Debug",action:"Auto-fix Booking retry 2/3",user:"U9f2d4e",status:"success"},
+];
+
+
+const DAILY=[
+  {d:"03-30",calls:142,err:8,ok:134},{d:"03-31",calls:167,err:12,ok:155},
+  {d:"04-01",calls:198,err:15,ok:183},{d:"04-02",calls:156,err:9,ok:147},
+  {d:"04-03",calls:213,err:18,ok:195},{d:"04-04",calls:178,err:11,ok:167},
+  {d:"04-05",calls:89,err:4,ok:85},
+];
+
+// ═══ COMPONENTS ═══
+const Link = ({children,color=CY,onClick}) => (
+  <span onClick={onClick} style={{color,cursor:"pointer",fontWeight:600,borderBottom:`1px dashed ${color}40`}}>{children}</span>
+);
+
+const Bar = ({v,c=G}) => (
+  <div style={{width:"100%",height:4,background:S3,borderRadius:2,overflow:"hidden"}}>
+    <div style={{width:`${Math.min(v,100)}%`,height:"100%",borderRadius:2,background:c}}/>
+  </div>
+);
+
+function Modal({children,onClose}) {
+  return (
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:100,display:"flex",justifyContent:"center",alignItems:"flex-start",paddingTop:32,overflowY:"auto"}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"#0d0f16",border:`1px solid ${B1}`,borderRadius:12,width:"92%",maxWidth:660,maxHeight:"85vh",overflowY:"auto",padding:18}}>
+        <div style={{textAlign:"right"}}><button onClick={onClose} style={{background:"none",border:"none",color:T3,fontSize:18,cursor:"pointer"}}>✕</button></div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ═══ JOURNEY TIMELINE ═══
+function Journey({journey, onClickAgent}) {
+  return journey.map((step,i) => {
+    const ag = AG(step.agent);
+    const cfg = STEP_CFG[step.st] || STEP_CFG.pending;
+    const ef = ag ? ag.errFreq : 0;
+    const isLast = i === journey.length - 1;
+
+    return (
+      <div key={i} style={{display:"flex",gap:10,marginBottom:isLast?0:2}}>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:18}}>
+          <div style={{width:18,height:18,borderRadius:9,background:cfg.color+"18",border:`2px solid ${cfg.color}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,flexShrink:0}}>{cfg.icon}</div>
+          {!isLast && <div style={{width:2,flex:1,background:step.st==="success"?G+"30":B1,minHeight:16}}/>}
+        </div>
+        <div style={{flex:1,background:S1,border:`1px solid ${step.st==="waiting_approval"?OR+"50":step.st==="in_progress"?B+"50":step.st==="fail"?R+"40":B1}`,borderRadius:8,padding:10,marginBottom:4}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:4}}>
+            <div style={{display:"flex",alignItems:"center",gap:5}}>
+              <span style={{fontSize:13}}>{ag?.icon||"?"}</span>
+              <Link color={CY} onClick={()=>ag && onClickAgent(ag)}>{step.agent}</Link>
+              <span style={{fontSize:7,fontWeight:700,padding:"1px 5px",borderRadius:5,color:cfg.color,background:cfg.color+"15"}}>{cfg.label}</span>
+            </div>
+            <span style={{fontSize:8,fontFamily:"monospace",color:T3}}>{step.time}</span>
+          </div>
+          <div style={{fontSize:10,color:step.st==="fail"?R:step.st==="in_progress"?B:T2,marginTop:3}}>{step.act}</div>
+          {ag && (
+            <div style={{display:"flex",gap:8,marginTop:5,fontSize:8,color:T3}}>
+              <span>Error Rate: <b style={{fontFamily:"monospace",color:ef>15?R:ef>5?A:G}}>{ef}%</b></span>
+              <span>Success: <b style={{fontFamily:"monospace",color:rc(ag.rate)}}>{ag.rate}%</b></span>
+              <span>Avg: <b style={{fontFamily:"monospace"}}>{ag.avgMs>1000?`${(ag.avgMs/1000).toFixed(1)}s`:`${ag.avgMs}ms`}</b></span>
+            </div>
+          )}
+          {step.st==="waiting_approval" && step.note && (
+            <div style={{marginTop:5,background:OR+"10",border:`1px solid ${OR}25`,borderRadius:6,padding:"5px 8px",fontSize:9,color:OR}}>
+              🔔 <b>รอ Approve จากทีม:</b> {step.note}
+            </div>
+          )}
+          {step.st==="fail" && step.note && (
+            <div style={{marginTop:5,background:R+"10",border:`1px solid ${R}25`,borderRadius:6,padding:"5px 8px",fontSize:9,color:R}}>
+              🚨 <b>ต้องแก้ไข:</b> {step.note}
+            </div>
+          )}
+          {step.st==="in_progress" && step.note && (
+            <div style={{marginTop:5,background:B+"10",border:`1px solid ${B}25`,borderRadius:6,padding:"5px 8px",fontSize:9,color:B}}>
+              ⚙️ <b>AI Agent กำลังทำงาน:</b> {step.note}
+            </div>
+          )}
+          {step.st==="pending" && step.note && (
+            <div style={{marginTop:5,background:A+"10",border:`1px solid ${A}25`,borderRadius:6,padding:"5px 8px",fontSize:9,color:A}}>
+              ⏸️ <b>รอลูกค้า:</b> {step.note}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  });
+}
+
+// ═══ MAIN APP ═══
+function App() {
+  const [tab, setTab] = useState("cust");
+  const [selA, setSelA] = useState(null);
+  const [selC, setSelC] = useState(null);
+
+  return (
+    <div style={{background:"#0b0d12",color:T1,fontFamily:"system-ui,sans-serif",fontSize:13,minHeight:"100vh"}}>
+
+      {/* ═══ AGENT MODAL ═══ */}
+      {selA && (
+        <Modal onClose={()=>setSelA(null)}>
+          <div style={{fontSize:17,fontWeight:700,marginBottom:8}}>{selA.icon} {selA.name}</div>
+          <div style={{fontSize:10,color:T2,marginBottom:12}}>{selA.desc}</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:4,marginBottom:12}}>
+            {[[`${selA.rate}%`,"Success Rate",rc(selA.rate)],[`${selA.errFreq}%`,"Error Freq",selA.errFreq>15?R:G],[`${selA.auto}%`,"Auto%",selA.auto>=80?G:A],[selA.avgMs>1000?`${(selA.avgMs/1000).toFixed(1)}s`:`${selA.avgMs}ms`,"Avg Time",B]].map(([v,l,c],i)=>
+              <div key={i} style={{background:S2,borderRadius:6,padding:8,textAlign:"center"}}>
+                <div style={{fontSize:16,fontWeight:700,fontFamily:"monospace",color:c}}>{v}</div>
+                <div style={{fontSize:7,color:T3}}>{l}</div>
+              </div>
+            )}
+          </div>
+          <div style={{fontSize:11,fontWeight:600,color:PK,marginBottom:4}}>👥 ลูกค้าที่เกี่ยวข้อง</div>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
+            {CUSTOMERS.filter(c=>c.journey.some(j=>j.agent===selA.name)).map(c=>
+              <span key={c.id} style={{background:S2,borderRadius:5,padding:"3px 8px",fontSize:10}}>
+                <Link color={PK} onClick={()=>{setSelA(null);setSelC(c)}}>{c.name}</Link>
+              </span>
+            )}
+          </div>
+          <div style={{fontSize:11,fontWeight:600,color:A,marginBottom:4}}>📋 Tasks วันนี้</div>
+          {TASKS.filter(t=>t.agent===selA.name).map((t,i)=>
+            <div key={i} style={{background:S2,borderRadius:5,padding:"4px 8px",marginBottom:2,fontSize:10,display:"flex",gap:6,alignItems:"center"}}>
+              <span style={{fontFamily:"monospace",color:T3,minWidth:34}}>{t.time}</span>
+              <span style={{color:T2,flex:1}}>{t.action}</span>
+              {t.user!=="system"&&<Link color={PK} onClick={()=>{const cu=CUSTOMERS.find(c=>c.id===t.user);if(cu){setSelA(null);setSelC(cu)}}}>{CUSTOMERS.find(c=>c.id===t.user)?.name||t.user.slice(0,8)}</Link>}
+              <span style={{fontSize:7,fontWeight:700,color:tc(t.status)}}>{t.status}</span>
+            </div>
+          )}
+        </Modal>
+      )}
+
+      {/* ═══ CUSTOMER MODAL ═══ */}
+      {selC && (
+        <Modal onClose={()=>setSelC(null)}>
+          <div style={{fontSize:17,fontWeight:700,marginBottom:2}}>👤 {selC.name}</div>
+          <div style={{fontSize:10,color:T2,marginBottom:10}}>
+            {selC.id} • <span style={{fontWeight:600,color:tc(selC.state==="COUNCIL_FAILED"?"fail":"in_progress")}}>{selC.state}</span>
+          </div>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
+            {[selC.city,selC.budget,selC.moveIn,selC.pkg].map((v,i)=>
+              <span key={i} style={{background:S2,borderRadius:5,padding:"3px 8px",fontSize:10,fontWeight:600}}>{v}</span>
+            )}
+          </div>
+          <div style={{background:S1,borderRadius:8,padding:10,marginBottom:12}}>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:4}}>
+              <span style={{fontWeight:600}}>Journey Progress</span>
+              <span style={{fontFamily:"monospace",color:G}}>{selC.journey.filter(s=>s.st==="success").length}/{selC.journey.length} done</span>
+            </div>
+            <Bar v={selC.journey.filter(s=>s.st==="success").length/selC.journey.length*100} c={G}/>
+            <div style={{display:"flex",gap:8,marginTop:6,fontSize:8,flexWrap:"wrap"}}>
+              {Object.entries(STEP_CFG).map(([k,v])=>{
+                const n=selC.journey.filter(s=>s.st===k).length;
+                return n?<span key={k} style={{color:v.color}}>{v.icon} {n} {v.label}</span>:null;
+              })}
+            </div>
+          </div>
+          <div style={{fontSize:12,fontWeight:600,marginBottom:8}}>🗺️ Customer Journey</div>
+          <Journey journey={selC.journey} onClickAgent={ag=>{setSelC(null);setSelA(ag)}}/>
+        </Modal>
+      )}
+
+      {/* ═══ HEADER ═══ */}
+      <div style={{padding:"12px 16px 8px",borderBottom:`1px solid ${B1}`,background:"linear-gradient(180deg,#101320,#0b0d12)"}}>
+        <div style={{fontSize:15,fontWeight:700}}>🏠 Peyton & Charmed <span style={{fontSize:8,background:G,color:"#000",padding:"1px 7px",borderRadius:7,marginLeft:4}}>DASHBOARD</span></div>
+        <div style={{fontSize:9,color:T3}}>คลิก <span style={{color:CY}}>ชื่อ Agent</span> หรือ <span style={{color:PK}}>ชื่อ Customer</span> เพื่อดูรายละเอียด</div>
+      </div>
+
+      {/* ═══ NAV ═══ */}
+      <div style={{display:"flex",gap:1,padding:"0 16px",borderBottom:`1px solid ${B1}`,background:S1}}>
+        {[["cust","👥 Customers"],["map","🗺️ Comm Map"],["perf","📈 Performance"],["agents","🤖 Agents"],["tasks","📋 Tasks"]].map(([id,l])=>
+          <button key={id} onClick={()=>setTab(id)} style={{padding:"7px 12px",fontSize:10,fontWeight:500,cursor:"pointer",border:"none",background:"none",borderBottom:`2px solid ${tab===id?G:"transparent"}`,color:tab===id?G:T3,fontFamily:"inherit"}}>{l}</button>
+        )}
+      </div>
+
+      <div style={{padding:"12px 16px 40px"}}>
+
+        {/* ═══ CUSTOMERS ═══ */}
+        {tab==="cust" && CUSTOMERS.map(c => {
+          const done = c.journey.filter(s=>s.st==="success").length;
+          const last = c.journey[c.journey.length-1];
+          const cfg = STEP_CFG[last.st] || STEP_CFG.pending;
+          return (
+            <div key={c.id} onClick={()=>setSelC(c)} style={{background:S1,border:`1px solid ${last.st==="waiting_approval"?OR+"50":last.st==="in_progress"?B+"50":last.st==="fail"?R+"40":B1}`,borderRadius:10,padding:12,marginBottom:6,cursor:"pointer"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4,flexWrap:"wrap",gap:4}}>
+                <Link color={PK} onClick={()=>setSelC(c)}>{c.name}</Link>
+                <span style={{fontSize:8,fontWeight:700,padding:"2px 7px",borderRadius:6,color:cfg.color,background:cfg.color+"15"}}>{cfg.icon} {cfg.label}</span>
+              </div>
+              <div style={{fontSize:9,color:T3,marginBottom:4}}>
+                Journey: <span style={{fontFamily:"monospace",color:G}}>{done}/{c.journey.length}</span> • Current: <Link color={CY} onClick={e=>{e.stopPropagation();setSelA(AG(c.agent))}}>{c.agent}</Link>
+              </div>
+              <Bar v={done/c.journey.length*100} c={G}/>
+              <div style={{display:"flex",gap:1,marginTop:5,flexWrap:"wrap",alignItems:"center"}}>
+                {c.journey.map((j,i) => {
+                  const s = STEP_CFG[j.st];
+                  return (
+                    <span key={i} style={{display:"flex",alignItems:"center"}}>
+                      <span style={{fontSize:7,padding:"1px 4px",borderRadius:3,background:s.color+"12",color:s.color,cursor:"pointer"}} onClick={e=>{e.stopPropagation();setSelA(AG(j.agent))}}>
+                        {AG(j.agent)?.icon} {j.agent}
+                      </span>
+                      {i<c.journey.length-1 && <span style={{color:T3,fontSize:7,margin:"0 1px"}}>→</span>}
+                    </span>
+                  );
+                })}
+              </div>
+              <div style={{display:"flex",gap:8,fontSize:8,color:T3,marginTop:4}}>
+                <span>🏙️ {c.city}</span><span>💰 {c.budget}</span><span>📅 {c.moveIn}</span>
+              </div>
+            </div>
+          );
+        })}
+
+
+        {/* ═══ COMMUNICATION MAP ═══ */}
+        {tab==="map" && (() => {
+          /* Active flows based on current customer states */
+          const activeFlows = [
+            {from:"Intake",to:"Sale",status:"done"},
+            {from:"Sale",to:"Search SA",status:"active"},
+            {from:"Sale",to:"Search PA",status:"done"},
+            {from:"Search PA",to:"Media",status:"done"},
+            {from:"Media",to:"Offer PA",status:"done"},
+            {from:"Offer PA",to:"Invoice",status:"done"},
+            {from:"Invoice",to:"Payment",status:"done"},
+            {from:"Payment",to:"Booking",status:"wait"},
+            {from:"Booking",to:"After Sales",status:"done"},
+            {from:"After Sales",to:"Council Tax",status:"wait"},
+            {from:"After Sales",to:"OVO Energy",status:"active"},
+            {from:"Search SA",to:"Viewing",status:"active"},
+          ];
+
+          const nodes = [
+            {id:"LINE",x:30,y:165,icon:"📱",label:"LINE OA",st:"ext"},
+            {id:"Chatbot/Orchestrator",x:130,y:165,icon:"💬",label:"Orchestrator",st:"live"},
+            {id:"Intake",x:260,y:100,icon:"🎯",label:"Intake",st:"live"},
+            {id:"Handoff Team",x:260,y:230,icon:"🚪",label:"Handoff",st:"live"},
+            {id:"Sale",x:380,y:100,icon:"💰",label:"Sale",st:"live"},
+            {id:"Search SA",x:510,y:50,icon:"🔍",label:"Search SA",st:"live"},
+            {id:"Search PA",x:510,y:155,icon:"🔎",label:"Search PA",st:"live"},
+            {id:"Viewing",x:640,y:50,icon:"🏠",label:"Viewing",st:"live"},
+            {id:"Media",x:640,y:155,icon:"📸",label:"Media",st:"live"},
+            {id:"Offer PA",x:770,y:155,icon:"🤝",label:"Offer PA",st:"wip"},
+            {id:"Invoice",x:770,y:50,icon:"🧾",label:"Invoice",st:"live"},
+            {id:"Payment",x:900,y:50,icon:"💳",label:"Payment",st:"live"},
+            {id:"Notify Hub",x:900,y:260,icon:"🔔",label:"Notify Hub",st:"live"},
+            {id:"Booking",x:1030,y:50,icon:"📋",label:"Booking",st:"live"},
+            {id:"After Sales",x:1160,y:50,icon:"📝",label:"After Sales",st:"live"},
+            {id:"Council Tax",x:1300,y:15,icon:"🏛️",label:"Council Tax",st:"live"},
+            {id:"OVO Energy",x:1300,y:75,icon:"⚡",label:"OVO Energy",st:"wip"},
+            {id:"Octopus",x:1300,y:135,icon:"🐙",label:"Octopus",st:"wip"},
+            {id:"Water",x:1300,y:195,icon:"💧",label:"Water",st:"plan"},
+            {id:"Broadband",x:1300,y:255,icon:"📡",label:"Broadband",st:"wip"},
+            {id:"Audit",x:640,y:320,icon:"🔍",label:"Audit Agent",st:"live"},
+            {id:"Debug",x:810,y:320,icon:"🛠️",label:"Debug Agent",st:"live"},
+            {id:"LG",x:1030,y:320,icon:"👥",label:"LINE Group",st:"ext"},
+          ];
+
+          const edges = [
+            ["LINE","Chatbot/Orchestrator"],["Chatbot/Orchestrator","Intake"],["Chatbot/Orchestrator","Handoff Team"],
+            ["Intake","Sale"],["Sale","Search SA"],["Sale","Search PA"],
+            ["Search SA","Viewing"],["Search PA","Media"],["Media","Offer PA"],
+            ["Viewing","Invoice"],["Offer PA","Invoice"],
+            ["Invoice","Payment"],["Payment","Booking"],["Booking","After Sales"],
+            ["After Sales","Council Tax"],["After Sales","OVO Energy"],["After Sales","Octopus"],
+            ["After Sales","Water"],["After Sales","Broadband"],
+            ["Audit","Debug"],["Audit","LG"],["Debug","LG"],
+            ["Notify Hub","LG"],["Handoff Team","LG"],
+          ];
+
+          const nMap = {};
+          nodes.forEach(n => nMap[n.id] = n);
+
+          const getFlowStatus = (from, to) => {
+            const f = activeFlows.find(fl => fl.from === from && fl.to === to);
+            return f ? f.status : "idle";
+          };
+
+          const stColor = st => ({live:G,wip:A,plan:T3,ext:B})[st] || T3;
+
+          return <>
+            <div style={{fontSize:12,fontWeight:600,margin:"8px 0 6px"}}>🗺️ Communication Map — Agent Flow ทั้งระบบ</div>
+
+            {/* Legend */}
+            <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:8,fontSize:9,color:T2}}>
+              <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:20,height:3,background:G,borderRadius:2,display:"inline-block"}}></span> Live</span>
+              <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:20,height:3,background:A,borderRadius:2,display:"inline-block"}}></span> WIP</span>
+              <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:20,height:3,background:T3,borderRadius:2,display:"inline-block",borderTop:"1px dashed "+T3}}></span> Planned</span>
+              <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:20,height:3,background:CY,borderRadius:2,display:"inline-block"}}></span> 🏃 กำลังทำงาน</span>
+              <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:20,height:3,background:OR,borderRadius:2,display:"inline-block"}}></span> 🔔 รอ Approve</span>
+            </div>
+
+            {/* Active status summary */}
+            <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
+              {[
+                {icon:"⚡",name:"OVO Energy",who:"Aussanee",what:"กรอก Step 3",st:"active"},
+                {icon:"🔍",name:"Search SA",who:"Orathai-Test",what:"ค้นหา iQ (retry)",st:"active"},
+                {icon:"🏛️",name:"Council Tax",who:"Aussanee",what:"รอ Approve Declaration",st:"wait"},
+                {icon:"📋",name:"Booking",who:"Piamsiri",what:"รอทีมยืนยัน iQ",st:"wait"},
+                {icon:"💰",name:"Sale",who:"Nithikorn",what:"รอลูกค้าตอบ",st:"pending"},
+              ].map((a,i)=>
+                <div key={i} style={{background:S1,border:`1px solid ${a.st==="active"?CY:a.st==="wait"?OR:A}40`,borderRadius:6,padding:"5px 10px",fontSize:9,display:"flex",alignItems:"center",gap:6,cursor:"pointer"}} onClick={()=>{const ag=AG(a.name);if(ag)setSelA(ag)}}>
+                  <span style={{fontSize:12}}>{a.icon}</span>
+                  <div>
+                    <div style={{fontWeight:600,color:a.st==="active"?CY:a.st==="wait"?OR:A}}>{a.name}</div>
+                    <div style={{color:T3}}>{a.who} — {a.what}</div>
+                  </div>
+                  <span style={{fontSize:7,fontWeight:700,padding:"1px 5px",borderRadius:4,color:a.st==="active"?CY:a.st==="wait"?OR:A,background:(a.st==="active"?CY:a.st==="wait"?OR:A)+"15"}}>{a.st==="active"?"⏳ ACTIVE":a.st==="wait"?"🔔 WAITING":"⏸️ PENDING"}</span>
+                </div>
+              )}
+            </div>
+
+            {/* SVG Map */}
+            <div style={{background:S1,border:`1px solid ${B1}`,borderRadius:10,padding:16,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+              <svg viewBox="0 0 1430 370" style={{width:"100%",minWidth:800,height:"auto"}} xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <marker id="ar" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><polygon points="0 0,5 2,0 4" fill={T3+"80"}/></marker>
+                  <marker id="ar-g" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><polygon points="0 0,5 2,0 4" fill={G+"80"}/></marker>
+                  <marker id="ar-cy" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><polygon points="0 0,5 2,0 4" fill={CY}/></marker>
+                  <marker id="ar-or" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><polygon points="0 0,5 2,0 4" fill={OR}/></marker>
+                </defs>
+
+                {/* Section labels */}
+                <text x="130" y="12" fontSize="7" fill={T3} fontWeight="600" fontFamily="system-ui">CUSTOMER FLOW</text>
+                <text x="770" y="12" fontSize="7" fill={T3} fontWeight="600" fontFamily="system-ui">DOC & FINANCE</text>
+                <text x="1160" y="12" fontSize="7" fill={T3} fontWeight="600" fontFamily="system-ui">POST-BOOKING</text>
+                <text x="640" y="355" fontSize="7" fill={T3} fontWeight="600" fontFamily="system-ui">MONITORING</text>
+
+                {/* Edges */}
+                {edges.map(([fromId,toId],i) => {
+                  const fn = nMap[fromId], tn = nMap[toId];
+                  if(!fn||!tn) return null;
+                  const fs = getFlowStatus(fromId, toId);
+                  const bothLive = fn.st==="live" && tn.st==="live";
+                  const anyPlan = fn.st==="plan" || tn.st==="plan";
+
+                  let stroke = anyPlan ? T3+"40" : bothLive ? G+"40" : A+"30";
+                  let sw = 1.2;
+                  let dashArray = anyPlan ? "3 3" : "none";
+                  let marker = "url(#ar)";
+                  let cls = "";
+
+                  if(fs==="active") { stroke=CY; sw=2.5; dashArray="8 8"; cls="flow-active"; marker="url(#ar-cy)"; }
+                  else if(fs==="wait") { stroke=OR; sw=2; dashArray="6 4"; cls="flow-wait"; marker="url(#ar-or)"; }
+                  else if(fs==="done") { stroke=G+"60"; sw=1.5; marker="url(#ar-g)"; }
+
+                  return <line key={i} x1={fn.x+25} y1={fn.y+13} x2={tn.x} y2={tn.y+13}
+                    stroke={stroke} strokeWidth={sw} strokeDasharray={dashArray}
+                    markerEnd={marker} className={cls}/>;
+                })}
+
+                {/* Nodes */}
+                {nodes.map(n => {
+                  const c = stColor(n.st);
+                  const isActive = activeFlows.some(f=>(f.from===n.id||f.to===n.id) && f.status==="active");
+                  const isWait = activeFlows.some(f=>f.to===n.id && f.status==="wait");
+                  const bg = isActive?"#0d2530":isWait?"#2a1e08":n.st==="live"?"#0d1f18":n.st==="wip"?"#1f1a0d":"#14161f";
+                  const border = isActive?CY:isWait?OR:c;
+                  const sw = isActive||isWait?2:1;
+
+                  return <g key={n.id} style={{cursor:"pointer"}} onClick={()=>{const ag=AG(n.id);if(ag)setSelA(ag)}}>
+                    {isActive && <rect x={n.x-3} y={n.y-3} width={56} height={32} rx={10} fill="none" stroke={CY} strokeWidth={1} className="flow-wait" opacity={0.5}/>}
+                    {isWait && <rect x={n.x-3} y={n.y-3} width={56} height={32} rx={10} fill="none" stroke={OR} strokeWidth={1} className="flow-wait" opacity={0.5}/>}
+                    <rect x={n.x} y={n.y} width={50} height={26} rx={7} fill={bg} stroke={border} strokeWidth={sw}/>
+                    <text x={n.x+25} y={n.y+14} textAnchor="middle" dominantBaseline="central" fontSize={12}>{n.icon}</text>
+                    <text x={n.x+25} y={n.y+34} textAnchor="middle" fontSize={7} fill={border} fontWeight={isActive||isWait?700:500} fontFamily="system-ui">{n.label}</text>
+                    {isActive && <text x={n.x+25} y={n.y+44} textAnchor="middle" fontSize={6} fill={CY} fontFamily="system-ui">⏳ ACTIVE</text>}
+                    {isWait && <text x={n.x+25} y={n.y+44} textAnchor="middle" fontSize={6} fill={OR} fontFamily="system-ui">🔔 WAITING</text>}
+                  </g>;
+                })}
+              </svg>
+            </div>
+          </>;
+        })()}
+
+        {/* ═══ PERFORMANCE ANALYSIS ═══ */}
+        {tab==="perf" && <>
+          {/* ── Summary Cards ── */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:5,marginBottom:14}}>
+            {[
+              [AGENTS.reduce((s,a)=>s+a.calls,0).toLocaleString(),"Total Calls (All Time)",B],
+              [(AGENTS.filter(a=>a.calls>0).reduce((s,a)=>s+a.rate,0)/AGENTS.filter(a=>a.calls>0).length).toFixed(1)+"%","Avg Success Rate",G],
+              [(AGENTS.filter(a=>a.calls>0).reduce((s,a)=>s+a.errFreq,0)/AGENTS.filter(a=>a.calls>0).length).toFixed(1)+"%","Avg Error Freq",R],
+              [AGENTS.filter(a=>a.errFreq>15).length+" agents","Error Freq > 15%",R],
+              [(AGENTS.filter(a=>a.calls>0).reduce((s,a)=>s+a.avgMs,0)/AGENTS.filter(a=>a.calls>0).length/1000).toFixed(1)+"s","Avg Response Time",B],
+              [AGENTS.filter(a=>a.auto>=80).length+"/"+AGENTS.filter(a=>a.status!=="plan").length,"Auto% >= 80%",G],
+            ].map(([v,l,c],i)=>
+              <div key={i} style={{background:S1,border:"1px solid "+B1,borderRadius:8,padding:"10px 12px"}}>
+                <div style={{fontSize:18,fontWeight:700,fontFamily:"monospace",color:c,lineHeight:1}}>{v}</div>
+                <div style={{fontSize:7,color:T3,textTransform:"uppercase",marginTop:3}}>{l}</div>
+              </div>
+            )}
+          </div>
+
+          {/* ── 7-Day Trend Chart ── */}
+          <div style={{fontSize:12,fontWeight:600,margin:"8px 0 6px"}}>📈 Trend 7 วัน — Calls vs Errors</div>
+          <div style={{background:S1,border:"1px solid "+B1,borderRadius:8,padding:14,marginBottom:14}}>
+            <div style={{display:"flex",alignItems:"flex-end",gap:5,height:110}}>
+              {DAILY.map((d,i)=>{
+                const mx=Math.max(...DAILY.map(x=>x.calls));
+                const h=Math.max(d.calls/mx*100,4);
+                const errPct=d.err/d.calls*100;
+                return <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+                  <div style={{fontSize:9,fontFamily:"monospace",color:T2}}>{d.calls}</div>
+                  <div style={{width:"100%",height:h+"%",borderRadius:"3px 3px 0 0",position:"relative",overflow:"hidden"}}>
+                    <div style={{position:"absolute",bottom:0,width:"100%",height:errPct+"%",background:R,borderRadius:"0 0 3px 3px"}}/>
+                    <div style={{position:"absolute",bottom:errPct+"%",width:"100%",height:(100-errPct)+"%",background:G,borderRadius:"3px 3px 0 0"}}/>
+                  </div>
+                  <div style={{fontSize:8,color:R,fontFamily:"monospace"}}>{d.err}</div>
+                  <div style={{fontSize:7,color:T3,fontFamily:"monospace"}}>{d.d}</div>
+                </div>;
+              })}
+            </div>
+            <div style={{display:"flex",gap:14,fontSize:9,color:T3,marginTop:6}}>
+              <span><span style={{color:G}}>■</span> Success</span>
+              <span><span style={{color:R}}>■</span> Errors</span>
+              <span style={{marginLeft:"auto",fontFamily:"monospace"}}>7d Total: {DAILY.reduce((s,d)=>s+d.calls,0)} calls / {DAILY.reduce((s,d)=>s+d.err,0)} errors</span>
+            </div>
+          </div>
+
+          {/* ── Error Frequency Analysis ── */}
+          <div style={{fontSize:12,fontWeight:600,margin:"8px 0 6px"}}>🔴 Error Frequency Analysis — Agent ไหน error บ่อยที่สุด</div>
+          <div style={{background:S1,border:"1px solid "+B1,borderRadius:8,padding:14,marginBottom:14}}>
+            {AGENTS.filter(a=>a.calls>0).sort((a,b)=>b.errFreq-a.errFreq).map(a=>{
+              const barW=Math.min(a.errFreq/45*100,100);
+              return <div key={a.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,cursor:"pointer"}} onClick={()=>setSelA(a)}>
+                <span style={{fontSize:13,minWidth:20}}>{a.icon}</span>
+                <span style={{fontSize:10,fontWeight:600,minWidth:110,color:CY}}>{a.name}</span>
+                <div style={{flex:1,height:14,background:S3,borderRadius:3,overflow:"hidden",position:"relative"}}>
+                  <div style={{height:"100%",width:barW+"%",borderRadius:3,background:a.errFreq>20?R:a.errFreq>10?A:G,transition:"width .4s"}}/>
+                  <span style={{position:"absolute",right:4,top:0,fontSize:8,fontWeight:700,color:T1,lineHeight:"14px"}}>{a.errFreq}%</span>
+                </div>
+                <span style={{fontSize:8,fontFamily:"monospace",color:T3,minWidth:50,textAlign:"right"}}>{a.calls} calls</span>
+              </div>;
+            })}
+          </div>
+
+          {/* ── Success Rate Ranking ── */}
+          <div style={{fontSize:12,fontWeight:600,margin:"8px 0 6px"}}>🏆 Success Rate Ranking</div>
+          <div style={{overflowX:"auto"}}>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
+              <thead><tr>{["#","Agent","Status","Auto%","Total Calls","Success","Fail","Success Rate","Error Freq","Avg Time"].map(h=>
+                <th key={h} style={{textAlign:"left",fontSize:7,fontWeight:600,color:T3,textTransform:"uppercase",padding:"6px 6px",borderBottom:"1px solid "+B1,whiteSpace:"nowrap"}}>{h}</th>
+              )}</tr></thead>
+              <tbody>
+                {AGENTS.filter(a=>a.calls>0).sort((a,b)=>b.rate-a.rate).map((a,i)=>{
+                  const success=Math.round(a.calls*a.rate/100);
+                  const fail=a.calls-success;
+                  return <tr key={a.id} style={{borderBottom:"1px solid "+B1,cursor:"pointer"}} onClick={()=>setSelA(a)}>
+                    <td style={{padding:"6px",fontFamily:"monospace",color:T3}}>{i+1}</td>
+                    <td style={{fontWeight:600,whiteSpace:"nowrap"}}>{a.icon} <Link color={CY} onClick={()=>setSelA(a)}>{a.name}</Link></td>
+                    <td><span style={{fontSize:7,fontWeight:700,padding:"1px 5px",borderRadius:5,color:a.status==="live"?G:A,background:(a.status==="live"?G:A)+"15"}}>{a.status.toUpperCase()}</span></td>
+                    <td style={{fontFamily:"monospace",color:a.auto>=80?G:A}}>{a.auto}%</td>
+                    <td style={{fontFamily:"monospace"}}>{a.calls}</td>
+                    <td style={{fontFamily:"monospace",color:G}}>{success}</td>
+                    <td style={{fontFamily:"monospace",color:fail>0?R:T3}}>{fail}</td>
+                    <td style={{fontFamily:"monospace",fontWeight:700,color:rc(a.rate)}}>{a.rate}%</td>
+                    <td style={{fontFamily:"monospace",color:a.errFreq>15?R:a.errFreq>5?A:G}}>{a.errFreq}%</td>
+                    <td style={{fontFamily:"monospace",fontSize:9}}>{a.avgMs>1000?(a.avgMs/1000).toFixed(1)+"s":a.avgMs+"ms"}</td>
+                  </tr>;
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ── Response Time Ranking ── */}
+          <div style={{fontSize:12,fontWeight:600,margin:"16px 0 6px"}}>⏱️ Response Time — Agent ไหนช้าที่สุด</div>
+          <div style={{background:S1,border:"1px solid "+B1,borderRadius:8,padding:14}}>
+            {AGENTS.filter(a=>a.calls>0).sort((a,b)=>b.avgMs-a.avgMs).map(a=>{
+              const maxMs=Math.max(...AGENTS.map(x=>x.avgMs));
+              const barW=a.avgMs/maxMs*100;
+              const timeStr=a.avgMs>1000?(a.avgMs/1000).toFixed(1)+"s":a.avgMs+"ms";
+              const isLong=a.avgMs>10000;
+              return <div key={a.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,cursor:"pointer"}} onClick={()=>setSelA(a)}>
+                <span style={{fontSize:13,minWidth:20}}>{a.icon}</span>
+                <span style={{fontSize:10,fontWeight:600,minWidth:110,color:CY}}>{a.name}</span>
+                <div style={{flex:1,height:14,background:S3,borderRadius:3,overflow:"hidden",position:"relative"}}>
+                  <div style={{height:"100%",width:barW+"%",borderRadius:3,background:isLong?OR:a.avgMs>3000?A:G}}/>
+                  <span style={{position:"absolute",right:4,top:0,fontSize:8,fontWeight:700,color:T1,lineHeight:"14px"}}>{timeStr}</span>
+                </div>
+              </div>;
+            })}
+          </div>
+        </>}
+
+        {/* ═══ AGENTS ═══ */}
+        {tab==="agents" && (
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:5}}>
+            {AGENTS.filter(a=>a.calls>0).sort((a,b)=>b.rate-a.rate).map(a => (
+              <div key={a.id} onClick={()=>setSelA(a)} style={{background:S1,border:`1px solid ${B1}`,borderRadius:8,padding:10,cursor:"pointer"}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5}}>
+                  <span style={{fontSize:15}}>{a.icon}</span>
+                  <Link color={CY} onClick={()=>setSelA(a)}>{a.name}</Link>
+                  <span style={{fontSize:7,fontWeight:700,padding:"1px 5px",borderRadius:6,color:a.status==="live"?G:A,background:(a.status==="live"?G:A)+"15"}}>{a.status.toUpperCase()}</span>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:3,marginBottom:5}}>
+                  {[[`${a.rate}%`,"RATE",rc(a.rate)],[`${a.errFreq}%`,"ERR",a.errFreq>15?R:G],[a.avgMs>1000?`${(a.avgMs/1000).toFixed(1)}s`:`${a.avgMs}ms`,"TIME",B]].map(([v,l,c],i) => (
+                    <div key={i} style={{background:S2,borderRadius:4,padding:"3px 4px",textAlign:"center"}}>
+                      <div style={{fontSize:11,fontWeight:700,fontFamily:"monospace",color:c}}>{v}</div>
+                      <div style={{fontSize:6,color:T3}}>{l}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{fontSize:7,color:T3,display:"flex",justifyContent:"space-between"}}><span>Auto%</span><span style={{fontFamily:"monospace",color:a.auto>=80?G:A}}>{a.auto}%</span></div>
+                <Bar v={a.auto} c={a.auto>=80?G:A}/>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ═══ TASKS ═══ */}
+        {tab==="tasks" && TASKS.map((t,i) => (
+          <div key={i} style={{background:S1,border:`1px solid ${B1}`,borderRadius:6,padding:"6px 10px",marginBottom:3,display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",fontSize:10}}>
+            <span style={{fontFamily:"monospace",color:T3,minWidth:34}}>{t.time}</span>
+            <Link color={CY} onClick={()=>setSelA(AG(t.agent))}>{t.agent}</Link>
+            <span style={{color:T2,flex:1}}>{t.action}</span>
+            {t.user!=="system" && <Link color={PK} onClick={()=>{const cu=CUSTOMERS.find(c=>c.id===t.user);if(cu)setSelC(cu)}}>{CUSTOMERS.find(c=>c.id===t.user)?.name||t.user.slice(0,8)}</Link>}
+            <span style={{fontSize:7,fontWeight:700,padding:"1px 5px",borderRadius:5,color:tc(t.status),background:tc(t.status)+"12"}}>{t.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+document.getElementById("loading").style.display="none";
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
