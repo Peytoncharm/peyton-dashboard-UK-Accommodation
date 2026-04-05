@@ -25,11 +25,129 @@ body{background:#0b0d12;color:#e6e8ef;font-family:-apple-system,BlinkMacSystemFo
 <body>
 <div id="loading"><div class="sp"></div><div>Loading Dashboard...</div></div>
 <div id="err-box"><div style="font-size:24px;margin-bottom:12px">⚠️</div><div style="font-weight:700">โหลดไม่สำเร็จ</div><div id="err-msg" style="color:#98a0b8;font-size:11px;margin-top:6px"></div></div>
+<div id="conn-bar" style="padding:5px 24px;font-size:11px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #2a3050;background:#f5b73110;color:#f5b731"><span style="width:7px;height:7px;border-radius:50%;background:#f5b731;display:inline-block"></span> กำลังเชื่อมต่อ API...</div>
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
-<script>window.addEventListener("error",function(e){document.getElementById("loading").style.display="none";document.getElementById("err-box").style.display="block";document.getElementById("err-msg").textContent=e.message||"Unknown error"});</script>
+<script>window.addEventListener("error",function(e){document.getElementById("loading").style.display="none";
+
+// ═══ API CONNECTION ═══
+const API_BASE_DEFAULT = "https://peyton-charmed-bot.onrender.com";
+let API_BASE = API_BASE_DEFAULT;
+try { const saved = localStorage.getItem("pc_dash_api"); if (saved) API_BASE = saved; } catch(e){}
+
+async function apiFetch(path) {
+  try {
+    const r = await fetch(API_BASE + path, {mode:"cors"});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } catch(e) { console.log("API " + path + ": " + e.message); return null; }
+}
+
+// Global state for API data
+let API_DATA = { health: null, agents: null, errors: null, customers: null, connected: false, lastUpdate: null };
+
+async function refreshAPIData() {
+  const [health, agents, errors, customers] = await Promise.all([
+    apiFetch("/api/dashboard/health"),
+    apiFetch("/api/dashboard/agents"),
+    apiFetch("/api/dashboard/errors"),
+    apiFetch("/api/dashboard/customers"),
+  ]);
+  API_DATA.connected = !!(health || agents);
+  if (health) API_DATA.health = health;
+  if (agents) API_DATA.agents = agents;
+  if (errors) API_DATA.errors = errors;
+  if (customers) API_DATA.customers = customers;
+  API_DATA.lastUpdate = new Date().toLocaleTimeString("th-TH");
+  
+  // Update connection bar
+  const bar = document.getElementById("conn-bar");
+  if (bar) {
+    if (API_DATA.connected) {
+      bar.style.background = "#2dd4a010";
+      bar.style.color = "#2dd4a0";
+      bar.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:#2dd4a0;box-shadow:0 0 6px #2dd4a080;display:inline-block"></span> เชื่อมต่อ API สำเร็จ — ' + API_BASE + ' | อัพเดท: ' + API_DATA.lastUpdate;
+    } else {
+      bar.style.background = "#f0606010";
+      bar.style.color = "#f06060";
+      bar.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:#f06060;display:inline-block"></span> ไม่สามารถเชื่อมต่อ API — แสดง demo data | API: ' + API_BASE;
+    }
+  }
+  
+  // Update stats if connected
+  if (API_DATA.connected && API_DATA.agents) {
+    const sm = API_DATA.agents.summary || {};
+    const statsEl = document.getElementById("live-stats");
+    if (statsEl && sm.live !== undefined) {
+      statsEl.innerHTML = '<div style="font-size:9px;color:#2dd4a0;text-align:center">LIVE DATA</div>';
+    }
+  }
+  
+  // Update health tab
+  if (API_DATA.health) {
+    const hEl = document.getElementById("health-live");
+    if (hEl) {
+      const ch = API_DATA.health.checks || {};
+      let hhtml = '<div style="font-size:12px;font-weight:600;margin:8px 0 6px">' + (API_DATA.health.overall==="healthy"?"✅":"⚠️") + ' ระบบ: <span style="color:' + (API_DATA.health.overall==="healthy"?"#2dd4a0":"#f5b731") + '">' + API_DATA.health.overall + '</span></div>';
+      hhtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:5px">';
+      for (const [k,v] of Object.entries(ch)) {
+        const dc = v.status==="ok"?"#2dd4a0":"#f06060";
+        hhtml += '<div style="background:#13161f;border:1px solid #2a3050;border-radius:8px;padding:10px"><div style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:'+dc+';box-shadow:0 0 6px '+dc+'80"></span>'+k.toUpperCase()+'</div>';
+        hhtml += '<div style="font-size:10px;color:#98a0b8;margin-top:4px">'+(v.status==="ok"?"ทำงานปกติ":v.msg||v.status)+'</div>';
+        if (v.pending !== undefined) hhtml += '<div style="font-size:9px;color:#f5b731;margin-top:2px">รอ: '+v.pending+'</div>';
+        hhtml += '</div>';
+      }
+      hhtml += '</div>';
+      hEl.innerHTML = hhtml;
+    }
+  }
+  
+  // Update real customers
+  if (API_DATA.customers && API_DATA.customers.total > 0) {
+    const cEl = document.getElementById("real-customers");
+    if (cEl) {
+      let chtml = '<div style="font-size:12px;font-weight:600;margin:12px 0 6px;color:#30d5e8">📡 ข้อมูลจริงจาก Redis — ' + API_DATA.customers.total + ' customers</div>';
+      const sg = API_DATA.customers.state_groups || {};
+      if (Object.keys(sg).length > 0) {
+        chtml += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">';
+        for (const [s,c] of Object.entries(sg)) {
+          chtml += '<span style="background:#13161f;border:1px solid #2a3050;border-radius:5px;padding:3px 8px;font-size:10px"><span style="font-weight:600;color:#30d5e8">'+s+'</span> <span style="font-family:monospace;color:#98a0b8">'+c+'</span></span>';
+        }
+        chtml += '</div>';
+      }
+      for (const c of API_DATA.customers.customers.slice(0, 20)) {
+        chtml += '<div style="background:#13161f;border:1px solid #2a3050;border-radius:6px;padding:8px 10px;margin-bottom:3px;font-size:10px;display:flex;gap:10px;align-items:center">';
+        chtml += '<span style="font-family:monospace;color:#5f6680;min-width:70px">'+((c.user_id||"").substring(0,10))+'</span>';
+        chtml += '<span style="font-weight:600;color:#30d5e8;min-width:120px">'+(c.state||"?")+'</span>';
+        chtml += '<span style="color:#98a0b8">'+(c.agent||"—")+'</span>';
+        chtml += '</div>';
+      }
+      cEl.innerHTML = chtml;
+    }
+  }
+  
+  // Update real errors
+  if (API_DATA.errors && API_DATA.errors.total_errors > 0) {
+    const eEl = document.getElementById("real-errors");
+    if (eEl) {
+      let ehtml = '<div style="font-size:12px;font-weight:600;margin:12px 0 6px;color:#f06060">📡 Errors จริงจาก Audit Agent — ' + API_DATA.errors.total_errors + '</div>';
+      for (const e of API_DATA.errors.errors.slice(0, 10)) {
+        ehtml += '<div style="background:#13161f;border:1px solid #2a3050;border-radius:6px;padding:8px 10px;margin-bottom:3px;font-size:10px">';
+        ehtml += '<span style="color:#f06060;font-weight:600">'+(e.agent||"?")+'</span> ';
+        ehtml += '<span style="color:#98a0b8">'+(e.message||e.error||JSON.stringify(e).substring(0,100))+'</span>';
+        ehtml += '</div>';
+      }
+      eEl.innerHTML = ehtml;
+    }
+  }
+}
+
+// Auto-refresh every 30 seconds
+refreshAPIData();
+setInterval(refreshAPIData, 30000);
+document.getElementById("err-box").style.display="block";document.getElementById("err-msg").textContent=e.message||"Unknown error"});</script>
 <script type="text/babel" data-presets="react">
 const { useState } = React;
 
@@ -155,6 +273,27 @@ function Modal({children,onClose}) {
       <div onClick={e=>e.stopPropagation()} style={{background:"#0d0f16",border:`1px solid ${B1}`,borderRadius:12,width:"92%",maxWidth:660,maxHeight:"85vh",overflowY:"auto",padding:18}}>
         <div style={{textAlign:"right"}}><button onClick={onClose} style={{background:"none",border:"none",color:T3,fontSize:18,cursor:"pointer"}}>✕</button></div>
         {children}
+
+        {/* ═══ HEALTH (REAL-TIME) ═══ */}
+        {tab==="health" && <div>
+          <div id="health-live" style={{color:T3,textAlign:"center",padding:20}}>⏳ กำลังโหลดข้อมูล Health จาก API...</div>
+          <div id="real-customers" style={{marginTop:14}}></div>
+          <div id="real-errors" style={{marginTop:14}}></div>
+        </div>}
+
+        {/* ═══ SETTINGS ═══ */}
+        {tab==="sett" && <div style={{maxWidth:500}}>
+          <div style={{fontSize:13,fontWeight:600,margin:"8px 0 8px"}}>⚙️ ตั้งค่า Dashboard</div>
+          <div style={{fontSize:11,color:T2,marginBottom:4}}>API Base URL</div>
+          <input id="apiUrlInput" defaultValue={typeof API_BASE!=="undefined"?API_BASE:"https://peyton-charmed-bot.onrender.com"} style={{background:S2,border:"1px solid "+B1,color:T1,padding:"8px 12px",borderRadius:6,width:"100%",fontSize:12,fontFamily:"monospace",marginBottom:10}}/>
+          <button onClick={()=>{const v=document.getElementById("apiUrlInput").value;try{localStorage.setItem("pc_dash_api",v)}catch(e){};window.API_BASE=v;if(typeof refreshAPIData==="function")refreshAPIData();}} style={{background:G,color:"#000",border:"none",padding:"8px 20px",borderRadius:6,fontWeight:600,fontSize:12,cursor:"pointer"}}>💾 บันทึก & เชื่อมต่อใหม่</button>
+          <div style={{marginTop:16,fontSize:10,color:T3,lineHeight:1.8}}>
+            <b style={{color:T2}}>สถานะปัจจุบัน:</b><br/>
+            API: <span id="sett-api-url" style={{color:CY,fontFamily:"monospace"}}>{typeof API_BASE!=="undefined"?API_BASE:"—"}</span><br/>
+            อัพเดทล่าสุด: <span id="sett-last-update" style={{color:G}}>—</span>
+          </div>
+        </div>}
+
       </div>
     </div>
   );
@@ -297,7 +436,7 @@ function App() {
 
       {/* ═══ NAV ═══ */}
       <div style={{display:"flex",gap:1,padding:"0 16px",borderBottom:`1px solid ${B1}`,background:S1}}>
-        {[["cust","👥 Customers"],["map","🗺️ Comm Map"],["perf","📈 Performance"],["agents","🤖 Agents"],["tasks","📋 Tasks"]].map(([id,l])=>
+        {[["cust","👥 Customers"],["map","🗺️ Comm Map"],["perf","📈 Performance"],["agents","🤖 Agents"],["tasks","📋 Tasks"],["health","💚 Health"],["sett","⚙️ Settings"]].map(([id,l])=>
           <button key={id} onClick={()=>setTab(id)} style={{padding:"7px 12px",fontSize:10,fontWeight:500,cursor:"pointer",border:"none",background:"none",borderBottom:`2px solid ${tab===id?G:"transparent"}`,color:tab===id?G:T3,fontFamily:"inherit"}}>{l}</button>
         )}
       </div>
@@ -646,12 +785,150 @@ function App() {
             <span style={{fontSize:7,fontWeight:700,padding:"1px 5px",borderRadius:5,color:tc(t.status),background:tc(t.status)+"12"}}>{t.status}</span>
           </div>
         ))}
+
+        {/* ═══ HEALTH (REAL-TIME) ═══ */}
+        {tab==="health" && <div>
+          <div id="health-live" style={{color:T3,textAlign:"center",padding:20}}>⏳ กำลังโหลดข้อมูล Health จาก API...</div>
+          <div id="real-customers" style={{marginTop:14}}></div>
+          <div id="real-errors" style={{marginTop:14}}></div>
+        </div>}
+
+        {/* ═══ SETTINGS ═══ */}
+        {tab==="sett" && <div style={{maxWidth:500}}>
+          <div style={{fontSize:13,fontWeight:600,margin:"8px 0 8px"}}>⚙️ ตั้งค่า Dashboard</div>
+          <div style={{fontSize:11,color:T2,marginBottom:4}}>API Base URL</div>
+          <input id="apiUrlInput" defaultValue={typeof API_BASE!=="undefined"?API_BASE:"https://peyton-charmed-bot.onrender.com"} style={{background:S2,border:"1px solid "+B1,color:T1,padding:"8px 12px",borderRadius:6,width:"100%",fontSize:12,fontFamily:"monospace",marginBottom:10}}/>
+          <button onClick={()=>{const v=document.getElementById("apiUrlInput").value;try{localStorage.setItem("pc_dash_api",v)}catch(e){};window.API_BASE=v;if(typeof refreshAPIData==="function")refreshAPIData();}} style={{background:G,color:"#000",border:"none",padding:"8px 20px",borderRadius:6,fontWeight:600,fontSize:12,cursor:"pointer"}}>💾 บันทึก & เชื่อมต่อใหม่</button>
+          <div style={{marginTop:16,fontSize:10,color:T3,lineHeight:1.8}}>
+            <b style={{color:T2}}>สถานะปัจจุบัน:</b><br/>
+            API: <span id="sett-api-url" style={{color:CY,fontFamily:"monospace"}}>{typeof API_BASE!=="undefined"?API_BASE:"—"}</span><br/>
+            อัพเดทล่าสุด: <span id="sett-last-update" style={{color:G}}>—</span>
+          </div>
+        </div>}
+
       </div>
     </div>
   );
 }
 
 document.getElementById("loading").style.display="none";
+
+// ═══ API CONNECTION ═══
+const API_BASE_DEFAULT = "https://peyton-charmed-bot.onrender.com";
+let API_BASE = API_BASE_DEFAULT;
+try { const saved = localStorage.getItem("pc_dash_api"); if (saved) API_BASE = saved; } catch(e){}
+
+async function apiFetch(path) {
+  try {
+    const r = await fetch(API_BASE + path, {mode:"cors"});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } catch(e) { console.log("API " + path + ": " + e.message); return null; }
+}
+
+// Global state for API data
+let API_DATA = { health: null, agents: null, errors: null, customers: null, connected: false, lastUpdate: null };
+
+async function refreshAPIData() {
+  const [health, agents, errors, customers] = await Promise.all([
+    apiFetch("/api/dashboard/health"),
+    apiFetch("/api/dashboard/agents"),
+    apiFetch("/api/dashboard/errors"),
+    apiFetch("/api/dashboard/customers"),
+  ]);
+  API_DATA.connected = !!(health || agents);
+  if (health) API_DATA.health = health;
+  if (agents) API_DATA.agents = agents;
+  if (errors) API_DATA.errors = errors;
+  if (customers) API_DATA.customers = customers;
+  API_DATA.lastUpdate = new Date().toLocaleTimeString("th-TH");
+  
+  // Update connection bar
+  const bar = document.getElementById("conn-bar");
+  if (bar) {
+    if (API_DATA.connected) {
+      bar.style.background = "#2dd4a010";
+      bar.style.color = "#2dd4a0";
+      bar.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:#2dd4a0;box-shadow:0 0 6px #2dd4a080;display:inline-block"></span> เชื่อมต่อ API สำเร็จ — ' + API_BASE + ' | อัพเดท: ' + API_DATA.lastUpdate;
+    } else {
+      bar.style.background = "#f0606010";
+      bar.style.color = "#f06060";
+      bar.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:#f06060;display:inline-block"></span> ไม่สามารถเชื่อมต่อ API — แสดง demo data | API: ' + API_BASE;
+    }
+  }
+  
+  // Update stats if connected
+  if (API_DATA.connected && API_DATA.agents) {
+    const sm = API_DATA.agents.summary || {};
+    const statsEl = document.getElementById("live-stats");
+    if (statsEl && sm.live !== undefined) {
+      statsEl.innerHTML = '<div style="font-size:9px;color:#2dd4a0;text-align:center">LIVE DATA</div>';
+    }
+  }
+  
+  // Update health tab
+  if (API_DATA.health) {
+    const hEl = document.getElementById("health-live");
+    if (hEl) {
+      const ch = API_DATA.health.checks || {};
+      let hhtml = '<div style="font-size:12px;font-weight:600;margin:8px 0 6px">' + (API_DATA.health.overall==="healthy"?"✅":"⚠️") + ' ระบบ: <span style="color:' + (API_DATA.health.overall==="healthy"?"#2dd4a0":"#f5b731") + '">' + API_DATA.health.overall + '</span></div>';
+      hhtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:5px">';
+      for (const [k,v] of Object.entries(ch)) {
+        const dc = v.status==="ok"?"#2dd4a0":"#f06060";
+        hhtml += '<div style="background:#13161f;border:1px solid #2a3050;border-radius:8px;padding:10px"><div style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:'+dc+';box-shadow:0 0 6px '+dc+'80"></span>'+k.toUpperCase()+'</div>';
+        hhtml += '<div style="font-size:10px;color:#98a0b8;margin-top:4px">'+(v.status==="ok"?"ทำงานปกติ":v.msg||v.status)+'</div>';
+        if (v.pending !== undefined) hhtml += '<div style="font-size:9px;color:#f5b731;margin-top:2px">รอ: '+v.pending+'</div>';
+        hhtml += '</div>';
+      }
+      hhtml += '</div>';
+      hEl.innerHTML = hhtml;
+    }
+  }
+  
+  // Update real customers
+  if (API_DATA.customers && API_DATA.customers.total > 0) {
+    const cEl = document.getElementById("real-customers");
+    if (cEl) {
+      let chtml = '<div style="font-size:12px;font-weight:600;margin:12px 0 6px;color:#30d5e8">📡 ข้อมูลจริงจาก Redis — ' + API_DATA.customers.total + ' customers</div>';
+      const sg = API_DATA.customers.state_groups || {};
+      if (Object.keys(sg).length > 0) {
+        chtml += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">';
+        for (const [s,c] of Object.entries(sg)) {
+          chtml += '<span style="background:#13161f;border:1px solid #2a3050;border-radius:5px;padding:3px 8px;font-size:10px"><span style="font-weight:600;color:#30d5e8">'+s+'</span> <span style="font-family:monospace;color:#98a0b8">'+c+'</span></span>';
+        }
+        chtml += '</div>';
+      }
+      for (const c of API_DATA.customers.customers.slice(0, 20)) {
+        chtml += '<div style="background:#13161f;border:1px solid #2a3050;border-radius:6px;padding:8px 10px;margin-bottom:3px;font-size:10px;display:flex;gap:10px;align-items:center">';
+        chtml += '<span style="font-family:monospace;color:#5f6680;min-width:70px">'+((c.user_id||"").substring(0,10))+'</span>';
+        chtml += '<span style="font-weight:600;color:#30d5e8;min-width:120px">'+(c.state||"?")+'</span>';
+        chtml += '<span style="color:#98a0b8">'+(c.agent||"—")+'</span>';
+        chtml += '</div>';
+      }
+      cEl.innerHTML = chtml;
+    }
+  }
+  
+  // Update real errors
+  if (API_DATA.errors && API_DATA.errors.total_errors > 0) {
+    const eEl = document.getElementById("real-errors");
+    if (eEl) {
+      let ehtml = '<div style="font-size:12px;font-weight:600;margin:12px 0 6px;color:#f06060">📡 Errors จริงจาก Audit Agent — ' + API_DATA.errors.total_errors + '</div>';
+      for (const e of API_DATA.errors.errors.slice(0, 10)) {
+        ehtml += '<div style="background:#13161f;border:1px solid #2a3050;border-radius:6px;padding:8px 10px;margin-bottom:3px;font-size:10px">';
+        ehtml += '<span style="color:#f06060;font-weight:600">'+(e.agent||"?")+'</span> ';
+        ehtml += '<span style="color:#98a0b8">'+(e.message||e.error||JSON.stringify(e).substring(0,100))+'</span>';
+        ehtml += '</div>';
+      }
+      eEl.innerHTML = ehtml;
+    }
+  }
+}
+
+// Auto-refresh every 30 seconds
+refreshAPIData();
+setInterval(refreshAPIData, 30000);
+
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 </script>
 </body>
