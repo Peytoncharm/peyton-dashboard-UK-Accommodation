@@ -20,7 +20,7 @@ body{background:#0b0d12;color:#e6e8ef;font-family:-apple-system,BlinkMacSystemFo
 </head>
 <body>
 <div id="loading"><div class="sp"></div><div>Loading Dashboard...</div></div>
-<div id="err-box"><div style="font-size:24px;margin-bottom:12px">⚠️</div><div style="font-weight:700">โหลดไม่สำเร็จ</div><div id="err-msg" style="color:#98a0b8;font-size:11px;margin-top:6px"></div></div>
+<div id="err-box"><div style="font-size:24px;margin-bottom:12px">&#x26A0;&#xFE0F;</div><div style="font-weight:700">&#x0E42;&#x0E2B;&#x0E25;&#x0E14;&#x0E44;&#x0E21;&#x0E48;&#x0E2A;&#x0E33;&#x0E40;&#x0E23;&#x0E47;&#x0E08;</div><div id="err-msg" style="color:#98a0b8;font-size:11px;margin-top:6px"></div></div>
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -36,7 +36,7 @@ const Bar=function(p){return <div style={{width:"100%",height:4,background:S3,bo
 function Modal(p){
   return <div onClick={p.onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:100,display:"flex",justifyContent:"center",alignItems:"flex-start",paddingTop:32,overflowY:"auto"}}>
     <div onClick={function(e){e.stopPropagation()}} style={{background:"#0d0f16",border:"1px solid "+B1,borderRadius:12,width:"92%",maxWidth:660,maxHeight:"85vh",overflowY:"auto",padding:18}}>
-      <div style={{textAlign:"right"}}><button onClick={p.onClose} style={{background:"none",border:"none",color:T3,fontSize:18,cursor:"pointer"}}>✕</button></div>
+      <div style={{textAlign:"right"}}><button onClick={p.onClose} style={{background:"none",border:"none",color:T3,fontSize:18,cursor:"pointer"}}>&#x2715;</button></div>
       {p.children}
     </div>
   </div>
@@ -79,113 +79,92 @@ function App() {
 
   return <div style={{background:"#0b0d12",color:T1,fontFamily:"system-ui,sans-serif",fontSize:13,minHeight:"100vh"}}>
 
-    {/* Agent Modal */}
     {selA && <Modal onClose={function(){setSelA(null)}}>
       <div style={{fontSize:17,fontWeight:700,marginBottom:4}}>{selA.icon} {selA.name}</div>
-      <div style={{fontSize:10,color:T2,marginBottom:10}}>{selA.desc} • <span style={{color:sc(selA.status)}}>{(selA.status||"").toUpperCase()}</span></div>
+      <div style={{fontSize:10,color:T2,marginBottom:10}}>{selA.desc} &#x2022; <span style={{color:sc(selA.status)}}>{(selA.status||"").toUpperCase()}</span></div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:4,marginBottom:12}}>
-        {[[selA.auto+"%","Auto%",selA.auto>=80?G:A],[(selA.metrics||{}).total_calls||0,"Calls",B],[(selA.metrics||{}).success_rate||"—","Rate",G],[selA.error_count_24h||0,"Err 24h",R]].map(function(x,i){
+        {[[selA.auto+"%","Auto%",selA.auto>=80?G:A],[(selA.metrics||{}).total_calls||0,"Calls",B],[(selA.metrics||{}).success_rate||"\u2014","Rate",G],[selA.error_count_24h||0,"Err 24h",R]].map(function(x,i){
           return <div key={i} style={{background:S2,borderRadius:6,padding:8,textAlign:"center"}}>
             <div style={{fontSize:16,fontWeight:700,fontFamily:"monospace",color:x[2]}}>{x[0]}</div>
             <div style={{fontSize:7,color:T3}}>{x[1]}</div>
           </div>
         })}
       </div>
-      <div style={{fontSize:11,fontWeight:600,color:PK,marginBottom:4}}>👥 ลูกค้าที่เกี่ยวข้อง</div>
+      <div style={{fontSize:11,fontWeight:600,color:PK,marginBottom:4}}>&#x1F465; Customers</div>
       {customers.filter(function(c){return c.agent===selA.name}).map(function(c,i){
         return <div key={i} onClick={function(){setSelA(null);setSelC(c)}} style={{background:S2,borderRadius:5,padding:"4px 8px",marginBottom:2,fontSize:10,cursor:"pointer"}}>
-          <span style={{color:PK,fontWeight:600}}>{c.name||c.user_id}</span> <span style={{color:T3}}>— {c.state}</span>
+          <span style={{color:PK,fontWeight:600}}>{c.name||c.user_id}</span> <span style={{color:T3}}>\u2014 {c.state}</span>
         </div>
       })}
     </Modal>}
 
-    {/* Customer Modal */}
     {selC && <Modal onClose={function(){setSelC(null)}}>
-      <div style={{fontSize:17,fontWeight:700,marginBottom:2}}>👤 {selC.name||selC.user_id}</div>
-      <div style={{fontSize:10,color:T2,marginBottom:10}}>
-        {selC.user_id} • <span style={{fontWeight:600,color:CY}}>{selC.state}</span>
-      </div>
+      <div style={{fontSize:17,fontWeight:700,marginBottom:2}}>&#x1F464; {selC.name||selC.user_id}</div>
+      <div style={{fontSize:10,color:T2,marginBottom:10}}>{selC.user_id} &#x2022; <span style={{fontWeight:600,color:CY}}>{selC.state}</span></div>
       <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
         {[selC.city,selC.budget,selC.move_in,selC.pkg].filter(Boolean).map(function(v,i){
           return <span key={i} style={{background:S2,borderRadius:5,padding:"3px 8px",fontSize:10,fontWeight:600}}>{v}</span>
         })}
       </div>
-      <div style={{fontSize:11,fontWeight:600,marginBottom:4}}>📍 สถานะปัจจุบัน</div>
-      <div style={{background:S1,border:"1px solid "+B1,borderRadius:8,padding:10,marginBottom:10}}>
-        <div style={{fontSize:12,fontWeight:600,color:CY}}>{selC.agent||"—"}</div>
-        <div style={{fontSize:10,color:T2,marginTop:3}}>State: {selC.state}</div>
-      </div>
       {selC.agent && <div>
-        <div style={{fontSize:11,fontWeight:600,marginBottom:4}}>🤖 Agent ที่รับผิดชอบ</div>
+        <div style={{fontSize:11,fontWeight:600,marginBottom:4}}>&#x1F916; Agent</div>
         {agents.filter(function(a){return a.name===selC.agent}).map(function(a){
           return <div key={a.id} onClick={function(){setSelC(null);setSelA(a)}} style={{background:S2,borderRadius:6,padding:8,cursor:"pointer"}}>
-            <span style={{fontSize:14}}>{a.icon}</span> <span style={{color:CY,fontWeight:600}}>{a.name}</span> <span style={{fontSize:8,color:sc(a.status)}}>{(a.status||"").toUpperCase()}</span>
+            <span style={{fontSize:14}}>{a.icon}</span> <span style={{color:CY,fontWeight:600}}>{a.name}</span>
           </div>
         })}
       </div>}
     </Modal>}
 
-    {/* Header */}
     <div style={{padding:"12px 16px 8px",borderBottom:"1px solid "+B1,background:"linear-gradient(180deg,#101320,#0b0d12)"}}>
-      <div style={{fontSize:15,fontWeight:700}}>🏠 Peyton & Charmed <span style={{fontSize:8,background:G,color:"#000",padding:"1px 7px",borderRadius:7,marginLeft:4}}>DASHBOARD</span></div>
-      <div style={{fontSize:9,color:T3}}>คลิก <span style={{color:CY}}>ชื่อ Agent</span> หรือ <span style={{color:PK}}>ชื่อ Customer</span> เพื่อดูรายละเอียด</div>
+      <div style={{fontSize:15,fontWeight:700}}>&#x1F3E0; Peyton & Charmed <span style={{fontSize:8,background:G,color:"#000",padding:"1px 7px",borderRadius:7,marginLeft:4}}>DASHBOARD</span></div>
+      <div style={{fontSize:9,color:T3}}>Click <span style={{color:CY}}>Agent name</span> or <span style={{color:PK}}>Customer name</span> for details</div>
     </div>
     <div style={{padding:"5px 16px",fontSize:10,display:"flex",alignItems:"center",gap:6,borderBottom:"1px solid "+B1,background:d.ok?G+"10":d.loading?A+"10":R+"10",color:d.ok?G:d.loading?A:R}}>
       <span style={{width:7,height:7,borderRadius:"50%",background:d.ok?G:d.loading?A:R,display:"inline-block"}}/>
-      {d.ok?"📡 เชื่อมต่อ API สำเร็จ | อัพเดท: "+(d.ts||"—"):d.loading?"กำลังเชื่อมต่อ...":"❌ เชื่อมต่อไม่ได้"}
+      {d.ok?"&#x1F4E1; API Connected | Updated: "+(d.ts||"\u2014"):d.loading?"Connecting...":"&#x274C; Connection failed"}
     </div>
 
-    {/* Nav */}
     <div style={{display:"flex",gap:1,padding:"0 16px",borderBottom:"1px solid "+B1,background:S1,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-      {[["cust","👥 Customers"],["agents","🤖 Agents"],["tasks","📋 Tasks"],["perf","📈 Performance"],["map","🗺️ Comm Map"],["health","💚 Health"],["sett","⚙️ Settings"]].map(function(x){
+      {[["cust","&#x1F465; Customers"],["agents","&#x1F916; Agents"],["tasks","&#x1F4CB; Tasks"],["perf","&#x1F4C8; Performance"],["map","&#x1F5FA;&#xFE0F; Comm Map"],["health","&#x1F49A; Health"],["sett","&#x2699;&#xFE0F; Settings"]].map(function(x){
         return <button key={x[0]} onClick={function(){setTab(x[0])}} style={{padding:"7px 10px",fontSize:10,fontWeight:500,cursor:"pointer",border:"none",background:"none",borderBottom:"2px solid "+(tab===x[0]?G:"transparent"),color:tab===x[0]?G:T3,fontFamily:"inherit",whiteSpace:"nowrap"}}>{x[1]}</button>
       })}
     </div>
 
     <div style={{padding:"12px 16px 40px"}}>
 
-      {/* CUSTOMERS */}
       {tab==="cust" && <div>
-        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>⏳ กำลังโหลด...</div>}
-        {!d.loading && customers.length===0 && <div style={{textAlign:"center",padding:30,color:T3}}>ยังไม่มีลูกค้า — จะแสดงเมื่อมีลูกค้าเข้ามาทาง LINE</div>}
+        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>Loading...</div>}
+        {!d.loading && customers.length===0 && <div style={{textAlign:"center",padding:30,color:T3}}>No customers yet &#x2014; will show when customers message via LINE</div>}
         {customers.length>0 && <div>
-          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:6}}>📡 ลูกค้าจริง — {customers.length} คน <span style={{fontSize:8,color:G}}>auto-refresh 30s</span></div>
+          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:6}}>&#x1F4E1; Live Customers &#x2014; {customers.length} <span style={{fontSize:8,color:G}}>auto-refresh 30s</span></div>
           {customers.map(function(c,i){
             return <div key={i} onClick={function(){setSelC(c)}} style={{background:S1,border:"1px solid "+B1,borderRadius:10,padding:12,marginBottom:6,cursor:"pointer"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4,flexWrap:"wrap",gap:4}}>
-                <span style={{color:PK,fontWeight:600,cursor:"pointer",borderBottom:"1px dashed "+PK+"40"}}>{c.name||c.user_id}</span>
+                <span style={{color:PK,fontWeight:600}}>{c.name||c.user_id}</span>
                 <span style={{fontSize:8,fontWeight:700,padding:"2px 7px",borderRadius:6,color:CY,background:CY+"15"}}>{c.state}</span>
               </div>
-              <div style={{fontSize:9,color:T3,marginBottom:4}}>
-                Current: <span onClick={function(e){e.stopPropagation();var ag=agents.find(function(a){return a.name===c.agent});if(ag)setSelA(ag)}} style={{color:CY,fontWeight:600,cursor:"pointer",borderBottom:"1px dashed "+CY+"40"}}>{c.agent||"—"}</span>
-              </div>
-              <div style={{display:"flex",gap:8,fontSize:8,color:T3,marginTop:4}}>
-                {c.city && <span>🏙️ {c.city}</span>}
-                {c.budget && <span>💰 {c.budget}</span>}
-                {c.move_in && <span>📅 {c.move_in}</span>}
-                {c.pkg && <span>📦 {c.pkg}</span>}
-              </div>
+              <div style={{fontSize:9,color:T3}}>Agent: <span onClick={function(e){e.stopPropagation();var ag=agents.find(function(a){return a.name===c.agent});if(ag)setSelA(ag)}} style={{color:CY,fontWeight:600,cursor:"pointer"}}>{c.agent||"\u2014"}</span></div>
             </div>
           })}
         </div>}
       </div>}
 
-      {/* AGENTS */}
       {tab==="agents" && <div>
-        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>⏳ กำลังโหลด...</div>}
+        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>Loading...</div>}
         {agents.length>0 && <div>
-          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:6}}>📡 {summary.total||agents.length} agents ({summary.live||0} live, {summary.wip||0} wip, {summary.plan||0} plan)</div>
+          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:6}}>&#x1F4E1; {summary.total||agents.length} agents ({summary.live||0} live, {summary.wip||0} wip, {summary.plan||0} plan)</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:5}}>
             {agents.map(function(a){
               var m=a.metrics||{};
               return <div key={a.id} onClick={function(){setSelA(a)}} style={{background:S1,border:"1px solid "+(a.error_count_24h>0?R+"40":B1),borderRadius:8,padding:10,cursor:"pointer"}}>
                 <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
                   <span style={{fontSize:14}}>{a.icon}</span>
-                  <span style={{color:CY,fontWeight:600,fontSize:11,cursor:"pointer",borderBottom:"1px dashed "+CY+"40"}}>{a.name}</span>
+                  <span style={{color:CY,fontWeight:600,fontSize:11}}>{a.name}</span>
                   <span style={{fontSize:7,fontWeight:700,padding:"1px 5px",borderRadius:5,color:sc(a.status),background:sc(a.status)+"15"}}>{(a.status||"").toUpperCase()}</span>
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:3,marginBottom:4}}>
-                  {[[m.total_calls||0,"CALLS",B],[m.success_rate>0?m.success_rate+"%":"—","RATE",G],[m.avg_ms>1000?(m.avg_ms/1000).toFixed(1)+"s":m.avg_ms>0?m.avg_ms+"ms":"—","TIME",B]].map(function(x,i){
+                  {[[m.total_calls||0,"CALLS",B],[m.success_rate>0?m.success_rate+"%":"\u2014","RATE",G],[m.avg_ms>1000?(m.avg_ms/1000).toFixed(1)+"s":m.avg_ms>0?m.avg_ms+"ms":"\u2014","TIME",B]].map(function(x,i){
                     return <div key={i} style={{background:S2,borderRadius:4,padding:"3px 4px",textAlign:"center"}}>
                       <div style={{fontSize:11,fontWeight:700,fontFamily:"monospace",color:x[2]}}>{x[0]}</div>
                       <div style={{fontSize:6,color:T3}}>{x[1]}</div>
@@ -194,19 +173,18 @@ function App() {
                 </div>
                 <div style={{fontSize:7,color:T3,display:"flex",justifyContent:"space-between"}}><span>Auto%</span><span style={{fontFamily:"monospace",color:a.auto>=80?G:a.auto>0?A:T3}}>{a.auto}%</span></div>
                 <Bar v={a.auto} c={a.auto>=80?G:A}/>
-                {a.error_count_24h>0&&<div style={{fontSize:8,color:R,marginTop:3}}>⚠️ {a.error_count_24h} errors 24h</div>}
+                {a.error_count_24h>0&&<div style={{fontSize:8,color:R,marginTop:3}}>&#x26A0;&#xFE0F; {a.error_count_24h} errors 24h</div>}
               </div>
             })}
           </div>
         </div>}
       </div>}
 
-      {/* TASKS */}
       {tab==="tasks" && <div>
-        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>⏳ กำลังโหลด...</div>}
-        {!d.loading && errors.length===0 && tasks.length===0 && <div style={{textAlign:"center",padding:30,color:T3}}>ยังไม่มี tasks/errors วันนี้ — จะแสดงเมื่อ agent ทำงาน</div>}
+        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>Loading...</div>}
+        {!d.loading && errors.length===0 && tasks.length===0 && <div style={{textAlign:"center",padding:30,color:T3}}>No tasks/errors today &#x2014; will show when agents process messages</div>}
         {errors.length>0 && <div style={{marginBottom:14}}>
-          <div style={{fontSize:11,fontWeight:600,color:R,marginBottom:4}}>🔴 Errors ({errors.length})</div>
+          <div style={{fontSize:11,fontWeight:600,color:R,marginBottom:4}}>&#x1F534; Errors ({errors.length})</div>
           {errors.slice(0,15).map(function(e,i){
             return <div key={i} style={{background:S1,border:"1px solid "+R+"30",borderRadius:6,padding:"6px 10px",marginBottom:3,fontSize:10}}>
               <b style={{color:R}}>{e.agent||"?"}</b> <span style={{color:T2}}>{e.message||e.error||""}</span>
@@ -214,10 +192,10 @@ function App() {
           })}
         </div>}
         {tasks.length>0 && <div>
-          <div style={{fontSize:11,fontWeight:600,color:G,marginBottom:4}}>📋 Tasks ({tasks.length})</div>
+          <div style={{fontSize:11,fontWeight:600,color:G,marginBottom:4}}>&#x1F4CB; Tasks ({tasks.length})</div>
           {tasks.slice(0,20).map(function(t,i){
             return <div key={i} style={{background:S1,border:"1px solid "+B1,borderRadius:6,padding:"6px 10px",marginBottom:3,display:"flex",alignItems:"center",gap:7,fontSize:10}}>
-              <span style={{fontFamily:"monospace",color:T3,minWidth:45}}>{t.time_str||"—"}</span>
+              <span style={{fontFamily:"monospace",color:T3,minWidth:45}}>{t.time_str||"\u2014"}</span>
               <span style={{fontWeight:600,color:CY}}>{t.agent||"?"}</span>
               <span style={{color:T2,flex:1}}>{t.action||""}</span>
               <span style={{fontSize:7,fontWeight:700,padding:"1px 5px",borderRadius:5,color:sc(t.status),background:sc(t.status)+"12"}}>{t.status||"?"}</span>
@@ -226,11 +204,10 @@ function App() {
         </div>}
       </div>}
 
-      {/* PERFORMANCE */}
       {tab==="perf" && <div>
-        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>⏳ กำลังโหลด...</div>}
+        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>Loading...</div>}
         {perfAgents.length>0 && <div>
-          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:8}}>📡 Performance จาก Redis</div>
+          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:8}}>&#x1F4E1; Performance from Redis</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:5,marginBottom:14}}>
             {[[perfAgents.reduce(function(s,a){return s+(a.total_calls||0)},0),"Total Calls",B],[perfAgents.filter(function(a){return a.total_calls>0}).length+"/"+perfAgents.length,"Active",G],[perfAgents.reduce(function(s,a){return s+(a.fail||0)},0),"Fails",R]].map(function(x,i){
               return <div key={i} style={{background:S1,border:"1px solid "+B1,borderRadius:8,padding:"8px 10px"}}>
@@ -251,8 +228,8 @@ function App() {
                   <td style={{fontFamily:"monospace"}}>{a.total_calls||0}</td>
                   <td style={{fontFamily:"monospace",color:G}}>{a.success||0}</td>
                   <td style={{fontFamily:"monospace",color:(a.fail||0)>0?R:T3}}>{a.fail||0}</td>
-                  <td style={{fontFamily:"monospace",color:(a.success_rate||0)>=90?G:(a.success_rate||0)>0?A:T3}}>{a.success_rate>0?a.success_rate+"%":"—"}</td>
-                  <td style={{fontFamily:"monospace",fontSize:9}}>{(a.avg_ms||0)>1000?((a.avg_ms)/1000).toFixed(1)+"s":(a.avg_ms||0)>0?a.avg_ms+"ms":"—"}</td>
+                  <td style={{fontFamily:"monospace",color:(a.success_rate||0)>=90?G:(a.success_rate||0)>0?A:T3}}>{a.success_rate>0?a.success_rate+"%":"\u2014"}</td>
+                  <td style={{fontFamily:"monospace",fontSize:9}}>{(a.avg_ms||0)>1000?((a.avg_ms)/1000).toFixed(1)+"s":(a.avg_ms||0)>0?a.avg_ms+"ms":"\u2014"}</td>
                 </tr>
               })}</tbody>
             </table>
@@ -260,49 +237,111 @@ function App() {
         </div>}
       </div>}
 
-      {/* COMM MAP */}
+      {/* COMM MAP with animated flow lines */}
       {tab==="map" && <div>
-        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>⏳ กำลังโหลด...</div>}
-        {mapNodes.length>0 && <div>
-          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:6}}>📡 Topology — {mapNodes.length} nodes</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:4}}>
-            {mapNodes.map(function(n){
-              var c=sc(n.status);
-              return <div key={n.id} onClick={function(){var ag=agents.find(function(a){return a.name===n.name});if(ag)setSelA(ag)}} style={{background:S1,border:"1px solid "+c+"30",borderRadius:6,padding:"6px 8px",fontSize:10,cursor:"pointer"}}>
-                <div style={{display:"flex",alignItems:"center",gap:4}}><span style={{fontSize:13}}>{n.icon}</span><span style={{fontWeight:600,color:c}}>{n.name}</span></div>
-                <div style={{fontSize:7,color:T3,marginTop:2}}>{(n.status||"").toUpperCase()} • Auto {n.auto}%</div>
-              </div>
+        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>Loading...</div>}
+        {!d.loading && <div>
+          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:8}}>&#x1F4E1; Agent Communication Map &#x2014; Live Flow</div>
+          <div style={{background:S1,border:"1px solid "+B1,borderRadius:12,padding:16,overflowX:"auto"}}>
+            <svg viewBox="0 0 900 520" style={{width:"100%",minWidth:650,height:"auto"}}>
+              <defs>
+                <marker id="ah" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0 0, 6 2, 0 4" fill="#2dd4a0" opacity="0.6"/></marker>
+              </defs>
+              <style>{`
+                @keyframes flowR{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}
+                @keyframes pulse2{0%,100%{opacity:0.3}50%{opacity:1}}
+                .fl{stroke:#2dd4a040;stroke-width:2;fill:none;marker-end:url(#ah)}
+                .fa{stroke:#2dd4a0;stroke-width:2.5;fill:none;stroke-dasharray:8 32;animation:flowR 2s linear infinite;opacity:0.7}
+                .nb{rx:8;ry:8;stroke-width:1.5}
+                .nl{fill:#13161f;stroke:#2dd4a060}
+                .nw{fill:#13161f;stroke:#f5b73160}
+                .ne{fill:#13161f;stroke:#30d5e860}
+                .lt{fill:#e6e8ef;font-size:9px;font-weight:600;font-family:system-ui,sans-serif}
+                .ls{fill:#98a0b8;font-size:7px;font-family:system-ui,sans-serif}
+                .li{font-size:11px}
+              `}</style>
+
+              <line x1="80" y1="55" x2="195" y2="55" className="fl"/><line x1="80" y1="55" x2="195" y2="55" className="fa"/>
+              <line x1="305" y1="55" x2="395" y2="55" className="fl"/><line x1="305" y1="55" x2="395" y2="55" className="fa" style={{animationDelay:"0.3s"}}/>
+              <line x1="505" y1="55" x2="595" y2="55" className="fl"/><line x1="505" y1="55" x2="595" y2="55" className="fa" style={{animationDelay:"0.6s"}}/>
+              <line x1="705" y1="55" x2="795" y2="55" className="fl"/><line x1="705" y1="55" x2="795" y2="55" className="fa" style={{animationDelay:"0.9s"}}/>
+              <line x1="850" y1="75" x2="850" y2="130" className="fl"/><line x1="850" y1="75" x2="850" y2="130" className="fa" style={{animationDelay:"1.2s"}}/>
+              <line x1="795" y1="155" x2="605" y2="155" className="fl"/><line x1="795" y1="155" x2="605" y2="155" className="fa" style={{animationDelay:"1.5s"}}/>
+              <line x1="495" y1="155" x2="305" y2="155" className="fl"/><line x1="495" y1="155" x2="305" y2="155" className="fa" style={{animationDelay:"1.8s"}}/>
+              <line x1="195" y1="155" x2="105" y2="155" className="fl"/><line x1="195" y1="155" x2="105" y2="155" className="fa" style={{animationDelay:"2.1s"}}/>
+              <line x1="55" y1="175" x2="55" y2="230" className="fl"/><line x1="55" y1="175" x2="55" y2="230" className="fa" style={{animationDelay:"2.4s"}}/>
+              <line x1="155" y1="255" x2="295" y2="255" className="fl"/><line x1="155" y1="255" x2="295" y2="255" className="fa" style={{animationDelay:"2.7s"}}/>
+              <line x1="405" y1="255" x2="545" y2="255" className="fl"/><line x1="405" y1="255" x2="545" y2="255" className="fa" style={{animationDelay:"3.0s"}}/>
+              <line x1="655" y1="275" x2="655" y2="330" className="fl"/><line x1="655" y1="275" x2="655" y2="330" className="fa" style={{animationDelay:"3.3s"}}/>
+              <line x1="595" y1="355" x2="455" y2="355" className="fl"/><line x1="595" y1="355" x2="455" y2="355" className="fa" style={{animationDelay:"3.6s"}}/>
+              <line x1="345" y1="355" x2="205" y2="355" className="fl"/><line x1="345" y1="355" x2="205" y2="355" className="fa" style={{animationDelay:"3.9s"}}/>
+              <line x1="152" y1="375" x2="100" y2="430" className="fl"/><line x1="152" y1="375" x2="100" y2="430" className="fa" style={{animationDelay:"4.2s"}}/>
+              <line x1="450" y1="460" x2="545" y2="460" stroke="#f5b73125" strokeWidth="1.5" strokeDasharray="4 4" markerEnd="url(#ah)"/>
+              <line x1="705" y1="460" x2="795" y2="460" className="fl"/><line x1="705" y1="460" x2="795" y2="460" className="fa" style={{animationDelay:"0.5s"}}/>
+
+              <rect x="15" y="35" width="65" height="40" className="nb ne"/><text x="47" y="55" textAnchor="middle" className="li">&#x1F4F1;</text><text x="47" y="68" textAnchor="middle" className="ls">LINE OA</text>
+              <rect x="195" y="35" width="110" height="40" className="nb nl"/><text x="250" y="52" textAnchor="middle" className="lt">&#x1F500; Orchestrator</text><text x="250" y="67" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="395" y="35" width="110" height="40" className="nb nl"/><text x="450" y="52" textAnchor="middle" className="lt">&#x1F4DD; Intake</text><text x="450" y="67" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="595" y="35" width="110" height="40" className="nb nl"/><text x="650" y="52" textAnchor="middle" className="lt">&#x1F4B0; Sale</text><text x="650" y="67" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="795" y="35" width="110" height="40" className="nb nl"/><text x="850" y="52" textAnchor="middle" className="lt">&#x1F50D; Search</text><text x="850" y="67" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+
+              <rect x="5" y="135" width="100" height="40" className="nb nl"/><text x="55" y="152" textAnchor="middle" className="lt">&#x2705; Booking</text><text x="55" y="167" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="195" y="135" width="110" height="40" className="nb nl"/><text x="250" y="152" textAnchor="middle" className="lt">&#x1F4BC; Offer PA</text><text x="250" y="167" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="495" y="135" width="110" height="40" className="nb nl"/><text x="550" y="152" textAnchor="middle" className="lt">&#x1F440; Viewing</text><text x="550" y="167" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="695" y="135" width="110" height="40" className="nb nl"/><text x="750" y="152" textAnchor="middle" className="lt">&#x1F3AC; Media</text><text x="750" y="167" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+
+              <rect x="5" y="235" width="100" height="40" className="nb nl"/><text x="55" y="252" textAnchor="middle" className="lt">&#x1F9FE; Invoice</text><text x="55" y="267" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="295" y="235" width="110" height="40" className="nb nl"/><text x="350" y="252" textAnchor="middle" className="lt">&#x1F4B3; Payment</text><text x="350" y="267" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="545" y="235" width="110" height="40" className="nb nl"/><text x="600" y="252" textAnchor="middle" className="lt">&#x1F4E6; After Sales</text><text x="600" y="267" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+
+              <rect x="595" y="335" width="110" height="40" className="nb nl"/><text x="650" y="352" textAnchor="middle" className="lt">&#x1F3DB; Council Tax</text><text x="650" y="367" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="345" y="335" width="110" height="40" className="nb nw"/><text x="400" y="352" textAnchor="middle" className="lt">&#x26A1; Energy</text><text x="400" y="367" textAnchor="middle" className="ls" style={{fill:"#f5b731"}}>WIP</text>
+              <rect x="100" y="335" width="105" height="40" className="nb nl"/><text x="152" y="352" textAnchor="middle" className="lt">&#x1F4A7; Water</text><text x="152" y="367" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+
+              <rect x="50" y="435" width="100" height="40" className="nb nl"/><text x="100" y="452" textAnchor="middle" className="lt">&#x1F4FA; TV Licence</text><text x="100" y="467" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="200" y="435" width="110" height="40" className="nb nw"/><text x="255" y="452" textAnchor="middle" className="lt">&#x1F4F6; Broadband</text><text x="255" y="467" textAnchor="middle" className="ls" style={{fill:"#f5b731"}}>WIP</text>
+              <rect x="545" y="435" width="110" height="40" className="nb nl" style={{stroke:"#f5b73180"}}/><text x="600" y="452" textAnchor="middle" className="lt">&#x1F514; Notify Hub</text><text x="600" y="467" textAnchor="middle" className="ls" style={{fill:"#f5b731"}}>GATE</text>
+              <rect x="795" y="435" width="105" height="40" className="nb ne"/><text x="847" y="455" textAnchor="middle" className="li">&#x1F465;</text><text x="847" y="467" textAnchor="middle" className="ls">Team Group</text>
+
+              {[0,1,2,3,4].map(function(i){
+                return <circle key={i} r="3" fill="#2dd4a0" style={{opacity:0.7,animation:"pulse2 2s ease-in-out infinite",animationDelay:i*0.8+"s"}}>
+                  <animateMotion dur={6+i*0.5+"s"} repeatCount="indefinite" path="M47,55 L250,55 L450,55 L650,55 L850,55 L850,155 L750,155 L550,155 L250,155 L55,155 L55,255 L350,255 L600,255 L650,355 L400,355 L152,355 L100,455"/>
+                </circle>
+              })}
+            </svg>
+          </div>
+          <div style={{marginTop:8,display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
+            {[["&#x1F7E2; Live","#2dd4a0"],["&#x1F7E1; In Progress","#f5b731"],["&#x1F7E6; External","#30d5e8"],["\u2192 Data Flow","#2dd4a080"]].map(function(x,i){
+              return <span key={i} style={{fontSize:9,color:x[1]}} dangerouslySetInnerHTML={{__html:x[0]}}/>
             })}
           </div>
         </div>}
       </div>}
 
-      {/* HEALTH */}
       {tab==="health" && <div>
-        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>⏳ กำลังโหลด...</div>}
+        {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>Loading...</div>}
         {d.health && <div>
-          <div style={{fontSize:13,fontWeight:600,margin:"4px 0 8px"}}>{d.health.overall==="healthy"?"✅":"⚠️"} ระบบ: <span style={{color:d.health.overall==="healthy"?G:A}}>{d.health.overall}</span></div>
+          <div style={{fontSize:13,fontWeight:600,margin:"4px 0 8px"}}>{d.health.overall==="healthy"?"&#x2705;":"&#x26A0;&#xFE0F;"} System: <span style={{color:d.health.overall==="healthy"?G:A}}>{d.health.overall}</span></div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:5}}>
             {Object.entries(d.health.checks||{}).map(function(e){
               var k=e[0],v=e[1],dc=v.status==="ok"?G:R;
               return <div key={k} style={{background:S1,border:"1px solid "+B1,borderRadius:8,padding:10}}>
                 <div style={{fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span style={{width:7,height:7,borderRadius:"50%",background:dc,display:"inline-block"}}/>{k.toUpperCase()}</div>
-                <div style={{fontSize:10,color:T2,marginTop:3}}>{v.status==="ok"?"ทำงานปกติ":(v.msg||v.status)}</div>
-                {v.pending!==undefined&&<div style={{fontSize:9,color:A,marginTop:2}}>รอ: {v.pending}</div>}
+                <div style={{fontSize:10,color:T2,marginTop:3}}>{v.status==="ok"?"OK":(v.msg||v.status)}</div>
+                {v.pending!==undefined&&<div style={{fontSize:9,color:A,marginTop:2}}>Pending: {v.pending}</div>}
               </div>
             })}
           </div>
         </div>}
       </div>}
 
-      {/* SETTINGS */}
       {tab==="sett" && <div style={{maxWidth:480}}>
-        <div style={{fontSize:13,fontWeight:600,margin:"4px 0 8px"}}>⚙️ ตั้งค่า</div>
+        <div style={{fontSize:13,fontWeight:600,margin:"4px 0 8px"}}>&#x2699;&#xFE0F; Settings</div>
         <div style={{fontSize:10,color:T2,marginBottom:3}}>API Base URL</div>
         <input id="apiUrl" defaultValue="https://peyton-charmed-bot.onrender.com" style={{background:S2,border:"1px solid "+B1,color:T1,padding:"7px 10px",borderRadius:6,width:"100%",fontSize:11,fontFamily:"monospace",marginBottom:8}}/>
-        <button onClick={function(){var u=document.getElementById("apiUrl").value;try{localStorage.setItem("pc_api",u)}catch(x){};alert("บันทึกแล้ว — reload เพื่อเชื่อมใหม่")}} style={{background:G,color:"#000",border:"none",padding:"7px 16px",borderRadius:6,fontWeight:600,fontSize:11,cursor:"pointer"}}>💾 บันทึก</button>
+        <button onClick={function(){var u=document.getElementById("apiUrl").value;try{localStorage.setItem("pc_api",u)}catch(x){};alert("Saved - reload to reconnect")}} style={{background:G,color:"#000",border:"none",padding:"7px 16px",borderRadius:6,fontWeight:600,fontSize:11,cursor:"pointer"}}>&#x1F4BE; Save</button>
         <div style={{marginTop:14,fontSize:10,color:T3,lineHeight:1.8}}>
-          สถานะ: {d.ok?"✅ เชื่อมต่อแล้ว":"⏳ รอ"} | อัพเดท: {d.ts||"—"}<br/>
+          Status: {d.ok?"&#x2705; Connected":"&#x23F3; Waiting"} | Updated: {d.ts||"\u2014"}<br/>
           Agents: {summary.total||0} | Customers: {customers.length} | Errors: {errors.length}
         </div>
       </div>}
