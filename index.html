@@ -151,9 +151,33 @@ function App() {
       {/* CUSTOMERS TAB */}
       {tab==="cust" && <div>
         {d.loading && <div style={{textAlign:"center",padding:30,color:T3}}>Loading...</div>}
-        {!d.loading && customers.length===0 && <div style={{textAlign:"center",padding:30,color:T3}}>No customers yet — will show when customers message via LINE</div>}
+
+        {/* ACTION REQUIRED SECTION */}
+        {!d.loading && (d.cust&&d.cust.action_required||[]).length>0 && <div style={{marginBottom:16}}>
+          <div style={{fontSize:13,fontWeight:700,color:"#ff6b6b",marginBottom:8}}>🔴 Action Required — {(d.cust.action_required||[]).length} students waiting</div>
+          <div style={{background:S1,border:"1px solid "+B1,borderRadius:10,overflow:"hidden"}}>
+            <div style={{display:"grid",gridTemplateColumns:"2fr 1.5fr 1fr 1fr 2fr",padding:"8px 12px",borderBottom:"1px solid "+B1,fontSize:9,fontWeight:700,color:T3}}>
+              <span>Student</span><span>Stage</span><span>Waiting</span><span>Status</span><span>Action Needed</span>
+            </div>
+            {(d.cust.action_required||[]).map(function(ar,i){
+              var h=ar.waiting_hours||0;
+              var sc_=h>=4?"#ef4444":h>=1?"#f59e0b":"#10b981";
+              var badge_=h>=4?"\uD83D\uDD34 Urgent":h>=1?"\uD83D\uDFE1 Attention":"\uD83D\uDFE2 OK";
+              return <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1.5fr 1fr 1fr 2fr",padding:"10px 12px",borderBottom:"1px solid "+B1+"60",alignItems:"center",fontSize:11}}>
+                <span>{ar.zoho_link?<a href={ar.zoho_link} target="_blank" style={{color:PK,fontWeight:600,textDecoration:"none"}}>{ar.name}</a>:<span style={{color:PK,fontWeight:600}}>{ar.name}</span>}</span>
+                <span style={{color:CY,fontSize:9}}>{ar.agent||ar.state}</span>
+                <span style={{fontFamily:"monospace",color:sc_,fontWeight:700}}>{h>=1?h.toFixed(1)+"h":Math.round(h*60)+"m"}</span>
+                <span style={{fontSize:8,fontWeight:700,padding:"2px 6px",borderRadius:6,color:sc_,background:sc_+"20"}}>{badge_}</span>
+                <span style={{fontSize:10,color:T2}}>{ar.action_needed}</span>
+              </div>
+            })}
+          </div>
+        </div>}
+
+        {/* ALL CUSTOMERS LIST */}
+        {!d.loading && customers.length===0 && (d.cust&&d.cust.action_required||[]).length===0 && <div style={{textAlign:"center",padding:30,color:T3}}>No customers yet — will show when customers message via LINE</div>}
         {customers.length>0 && <div>
-          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:6}}>📡 Live Customers — {customers.length} <span style={{fontSize:8,color:G}}>auto-refresh 30s</span></div>
+          <div style={{fontSize:11,fontWeight:600,color:CY,marginBottom:6}}>📡 All Customers — {customers.length} <span style={{fontSize:8,color:G}}>auto-refresh 30s</span></div>
           {customers.map(function(c,i){
             return <div key={i} onClick={function(){setSelC(c)}} style={{background:S1,border:"1px solid "+B1,borderRadius:10,padding:12,marginBottom:6,cursor:"pointer"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4,flexWrap:"wrap",gap:4}}>
