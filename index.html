@@ -306,114 +306,115 @@ function App() {
               `}</style>
 
               {/* ── ROW LABELS ── */}
-              <rect x="2" y="22" width="956" height="56" className="rl"/><text x="10" y="35" className="rt">CUSTOMER FLOW</text>
-              <rect x="2" y="88" width="956" height="56" className="rl"/><text x="10" y="101" className="rt">SEARCH + BOOKING</text>
-              <rect x="2" y="154" width="956" height="56" className="rl"/><text x="10" y="167" className="rt">FINANCE + DOCUMENTS</text>
-              <rect x="2" y="220" width="956" height="56" className="rl"/><text x="10" y="233" className="rt">POST-BOOKING</text>
-              <rect x="2" y="286" width="956" height="56" className="rl"/><text x="10" y="299" className="rt">BILLS</text>
-              <rect x="2" y="352" width="650" height="56" className="rl"/><text x="10" y="365" className="rt">COMMISSION</text>
-              <rect x="2" y="418" width="956" height="56" className="rl"/><text x="10" y="431" className="rt">SUPPORT + MONITORING</text>
+              <rect x="2" y="22" width="956" height="56" className="rl"/><text x="10" y="35" className="rt">1. DISCOVERY</text>
+              <rect x="2" y="88" width="956" height="56" className="rl"/><text x="10" y="101" className="rt">2. PRE-SEARCH (before sale closes)</text>
+              <rect x="2" y="154" width="956" height="56" className="rl"/><text x="10" y="167" className="rt">3. SA ROUTE — sale decision</text>
+              <rect x="2" y="220" width="956" height="56" className="rl"/><text x="10" y="233" className="rt">4. PA ROUTE (after payment)</text>
+              <rect x="2" y="286" width="956" height="56" className="rl"/><text x="10" y="299" className="rt">5. MOVE-IN — bills + handover</text>
+              <rect x="2" y="352" width="650" height="56" className="rl"/><text x="10" y="365" className="rt">6. COMMISSION</text>
+              <rect x="2" y="418" width="956" height="56" className="rl"/><text x="10" y="431" className="rt">7. SUPPORT + MONITORING</text>
 
-              {/* ── ROW 1: CUSTOMER FLOW ── */}
-              <line x1="68" y1="50" x2="100" y2="50" className="fl"/><line x1="68" y1="50" x2="100" y2="50" className="fa"/>
-              <line x1="200" y1="50" x2="230" y2="50" className="fl"/><line x1="200" y1="50" x2="230" y2="50" className="fa" style={{animationDelay:"0.3s"}}/>
-              <line x1="330" y1="50" x2="360" y2="50" className="fl"/><line x1="330" y1="50" x2="360" y2="50" className="fa" style={{animationDelay:"0.6s"}}/>
-              <line x1="460" y1="50" x2="490" y2="50" className="fl"/><line x1="460" y1="50" x2="490" y2="50" className="fa" style={{animationDelay:"0.9s"}}/>
-              <line x1="590" y1="50" x2="620" y2="50" className="fl"/><line x1="590" y1="50" x2="620" y2="50" className="fa" style={{animationDelay:"1.2s"}}/>
-              <line x1="720" y1="50" x2="750" y2="50" className="fl"/><line x1="720" y1="50" x2="750" y2="50" className="fa" style={{animationDelay:"1.5s"}}/>
+              {/* ── ROW 1: DISCOVERY ── */}
+              {/* LINE OA → Orchestrator → Intake → Sale */}
+              <line x1="68" y1="50" x2="108" y2="50" className="fl"/><line x1="68" y1="50" x2="108" y2="50" className="fa"/>
+              <line x1="218" y1="50" x2="258" y2="50" className="fl"/><line x1="218" y1="50" x2="258" y2="50" className="fa" style={{animationDelay:"0.3s"}}/>
+              <line x1="368" y1="50" x2="408" y2="50" className="fl"/><line x1="368" y1="50" x2="408" y2="50" className="fa" style={{animationDelay:"0.6s"}}/>
 
               <rect x="10" y="30" width="58" height="40" className="nb ne"/><text x="39" y="50" textAnchor="middle" className="li">📱</text><text x="39" y="63" textAnchor="middle" className="ls">LINE OA</text>
-              <rect x="100" y="30" width="100" height="40" className="nb nl"/><text x="150" y="47" textAnchor="middle" className="lt">💬 Orchestrator</text><text x="150" y="62" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="230" y="30" width="100" height="40" className="nb nl"/><text x="280" y="47" textAnchor="middle" className="lt">🎯 Intake</text><text x="280" y="62" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="360" y="30" width="100" height="40" className="nb nl"/><text x="410" y="47" textAnchor="middle" className="lt">💰 Sale</text><text x="410" y="62" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="490" y="30" width="100" height="40" className="nb nl"/><text x="540" y="47" textAnchor="middle" className="lt">🔍 Search SA</text><text x="540" y="62" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="620" y="30" width="100" height="40" className="nb nl"/><text x="670" y="47" textAnchor="middle" className="lt">📋 PA Wait List</text><text x="670" y="62" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="750" y="30" width="100" height="40" className="nb nl"/><text x="800" y="47" textAnchor="middle" className="lt">🔎 Search PA</text><text x="800" y="62" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="108" y="30" width="110" height="40" className="nb nl"/><text x="163" y="47" textAnchor="middle" className="lt">💬 Orchestrator</text><text x="163" y="62" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="258" y="30" width="110" height="40" className="nb nl"/><text x="313" y="47" textAnchor="middle" className="lt">🎯 Intake</text><text x="313" y="62" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="408" y="30" width="110" height="40" className="nb nl"/><text x="463" y="47" textAnchor="middle" className="lt">💰 Sale</text><text x="463" y="62" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
 
-              {/* ── ROW 2: SEARCH + BOOKING ── */}
-              <line x1="140" y1="116" x2="230" y2="116" className="fl"/><line x1="140" y1="116" x2="230" y2="116" className="fa" style={{animationDelay:"0.4s"}}/>
-              <line x1="330" y1="116" x2="360" y2="116" className="fl"/><line x1="330" y1="116" x2="360" y2="116" className="fa" style={{animationDelay:"0.7s"}}/>
-              <line x1="460" y1="116" x2="490" y2="116" className="fl"/><line x1="460" y1="116" x2="490" y2="116" className="fa" style={{animationDelay:"1.0s"}}/>
-              <line x1="590" y1="116" x2="620" y2="116" className="fl"/><line x1="590" y1="116" x2="620" y2="116" className="fa" style={{animationDelay:"1.3s"}}/>
-              <line x1="720" y1="116" x2="750" y2="116" className="fl"/><line x1="720" y1="116" x2="750" y2="116" className="fa" style={{animationDelay:"1.6s"}}/>
+              {/* ── ROW 2: PRE-SEARCH ── */}
+              {/* Pre-search SA → Pre-search PA → Media → Viewing */}
+              <line x1="148" y1="116" x2="258" y2="116" className="fl"/><line x1="148" y1="116" x2="258" y2="116" className="fa" style={{animationDelay:"0.4s"}}/>
+              <line x1="368" y1="116" x2="408" y2="116" className="fl"/><line x1="368" y1="116" x2="408" y2="116" className="fa" style={{animationDelay:"0.7s"}}/>
+              <line x1="518" y1="116" x2="558" y2="116" className="fl"/><line x1="518" y1="116" x2="558" y2="116" className="fa" style={{animationDelay:"1.0s"}}/>
 
-              <rect x="40" y="96" width="100" height="40" className="nb nl"/><text x="90" y="113" textAnchor="middle" className="lt">📸 Media</text><text x="90" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="230" y="96" width="100" height="40" className="nb nl"/><text x="280" y="113" textAnchor="middle" className="lt">🏠 Viewing</text><text x="280" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="360" y="96" width="100" height="40" className="nb nl"/><text x="410" y="113" textAnchor="middle" className="lt">🤝 Offer PA</text><text x="410" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="490" y="96" width="100" height="40" className="nb nl"/><text x="540" y="113" textAnchor="middle" className="lt">📋 Booking</text><text x="540" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="620" y="96" width="100" height="40" className="nb nl"/><text x="670" y="113" textAnchor="middle" className="lt">⏱ Stuck Alert</text><text x="670" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="750" y="96" width="100" height="40" className="nb nl"/><text x="800" y="113" textAnchor="middle" className="lt">📢 Non-IQ</text><text x="800" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="870" y="96" width="82" height="40" className="nb nl"/><text x="911" y="113" textAnchor="middle" className="lt">💰 PA Deposit</text><text x="911" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="40" y="96" width="108" height="40" className="nb nl"/><text x="94" y="113" textAnchor="middle" className="lt">🔍 Pre-search SA</text><text x="94" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="258" y="96" width="110" height="40" className="nb nl"/><text x="313" y="113" textAnchor="middle" className="lt">🔎 Pre-search PA</text><text x="313" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="408" y="96" width="110" height="40" className="nb nl"/><text x="463" y="113" textAnchor="middle" className="lt">📸 Media</text><text x="463" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="558" y="96" width="110" height="40" className="nb nl"/><text x="613" y="113" textAnchor="middle" className="lt">🏠 Viewing</text><text x="613" y="128" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
 
-              {/* ── ROW 3: FINANCE + DOCUMENTS ── */}
-              <line x1="140" y1="182" x2="230" y2="182" className="fl"/><line x1="140" y1="182" x2="230" y2="182" className="fa" style={{animationDelay:"0.5s"}}/>
-              <line x1="330" y1="182" x2="360" y2="182" className="fl"/><line x1="330" y1="182" x2="360" y2="182" className="fa" style={{animationDelay:"0.8s"}}/>
-              <line x1="590" y1="182" x2="620" y2="182" className="fl"/>
+              {/* ── ROW 3: SA ROUTE ── */}
+              {/* Invoice → Payment → Booking → After Sales */}
+              <line x1="148" y1="182" x2="258" y2="182" className="fl"/><line x1="148" y1="182" x2="258" y2="182" className="fa" style={{animationDelay:"0.5s"}}/>
+              <line x1="368" y1="182" x2="408" y2="182" className="fl"/><line x1="368" y1="182" x2="408" y2="182" className="fa" style={{animationDelay:"0.8s"}}/>
+              <line x1="518" y1="182" x2="558" y2="182" className="fl"/><line x1="518" y1="182" x2="558" y2="182" className="fa" style={{animationDelay:"1.1s"}}/>
 
-              <rect x="40" y="162" width="100" height="40" className="nb nl"/><text x="90" y="179" textAnchor="middle" className="lt">🧾 Invoice</text><text x="90" y="194" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="230" y="162" width="100" height="40" className="nb nl"/><text x="280" y="179" textAnchor="middle" className="lt">💳 Payment</text><text x="280" y="194" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="360" y="162" width="100" height="40" className="nb nl"/><text x="410" y="179" textAnchor="middle" className="lt">📄 PA Document</text><text x="410" y="194" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="490" y="162" width="100" height="40" className="nb nl" style={{stroke:"#f5b73180"}}><title>Approval gateway</title></rect><text x="540" y="179" textAnchor="middle" className="lt">🔔 Notify Hub</text><text x="540" y="194" textAnchor="middle" className="ls" style={{fill:"#f5b731"}}>GATE</text>
-              <rect x="620" y="162" width="82" height="40" className="nb ne"/><text x="661" y="182" textAnchor="middle" className="li">👥</text><text x="661" y="194" textAnchor="middle" className="ls">Team Group</text>
+              <rect x="40" y="162" width="108" height="40" className="nb nl"/><text x="94" y="179" textAnchor="middle" className="lt">🧾 Invoice</text><text x="94" y="194" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="258" y="162" width="110" height="40" className="nb nl"/><text x="313" y="179" textAnchor="middle" className="lt">💳 Payment</text><text x="313" y="194" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="408" y="162" width="110" height="40" className="nb nl"/><text x="463" y="179" textAnchor="middle" className="lt">📋 Booking</text><text x="463" y="194" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="558" y="162" width="110" height="40" className="nb nl"/><text x="613" y="179" textAnchor="middle" className="lt">📦 After Sales</text><text x="613" y="194" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
 
-              {/* ── ROW 4: POST-BOOKING ── */}
-              <line x1="140" y1="248" x2="178" y2="248" className="fl"/><line x1="140" y1="248" x2="178" y2="248" className="fa" style={{animationDelay:"0.6s"}}/>
-              <line x1="272" y1="248" x2="310" y2="248" className="fl"/><line x1="272" y1="248" x2="310" y2="248" className="fa" style={{animationDelay:"0.9s"}}/>
-              <line x1="404" y1="248" x2="442" y2="248" className="fl"/>
-              <line x1="536" y1="248" x2="574" y2="248" className="fl"/>
-              <line x1="668" y1="248" x2="706" y2="248" className="fl"/>
+              {/* ── ROW 4: PA ROUTE ── */}
+              {/* PA Waiting List → Full PA Search → Offer PA → PA Deposit → PA Document */}
+              <line x1="148" y1="248" x2="190" y2="248" className="fl"/><line x1="148" y1="248" x2="190" y2="248" className="fa" style={{animationDelay:"0.3s"}}/>
+              <line x1="290" y1="248" x2="332" y2="248" className="fl"/><line x1="290" y1="248" x2="332" y2="248" className="fa" style={{animationDelay:"0.6s"}}/>
+              <line x1="432" y1="248" x2="474" y2="248" className="fl"/><line x1="432" y1="248" x2="474" y2="248" className="fa" style={{animationDelay:"0.9s"}}/>
+              <line x1="574" y1="248" x2="616" y2="248" className="fl"/><line x1="574" y1="248" x2="616" y2="248" className="fa" style={{animationDelay:"1.2s"}}/>
 
-              <rect x="40" y="228" width="100" height="40" className="nb nl"/><text x="90" y="245" textAnchor="middle" className="lt">📦 After Sales</text><text x="90" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="178" y="228" width="94" height="40" className="nb nl"/><text x="225" y="245" textAnchor="middle" className="lt">📷 Inventory</text><text x="225" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="310" y="228" width="94" height="40" className="nb nl"/><text x="357" y="245" textAnchor="middle" className="lt">📦 Handover</text><text x="357" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="442" y="228" width="94" height="40" className="nb nl"/><text x="489" y="245" textAnchor="middle" className="lt">🔧 Maintenance</text><text x="489" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="574" y="228" width="94" height="40" className="nb nl"/><text x="621" y="245" textAnchor="middle" className="lt">🚪 Handoff</text><text x="621" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="706" y="228" width="94" height="40" className="nb nl"/><text x="753" y="245" textAnchor="middle" className="lt">📚 Provider KB</text><text x="753" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="40" y="228" width="108" height="40" className="nb nl"/><text x="94" y="245" textAnchor="middle" className="lt">📋 PA Wait List</text><text x="94" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="190" y="228" width="100" height="40" className="nb nl"/><text x="240" y="245" textAnchor="middle" className="lt">🔎 Full PA Search</text><text x="240" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="332" y="228" width="100" height="40" className="nb nl"/><text x="382" y="245" textAnchor="middle" className="lt">🤝 Offer PA</text><text x="382" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="474" y="228" width="100" height="40" className="nb nl"/><text x="524" y="245" textAnchor="middle" className="lt">💰 PA Deposit</text><text x="524" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="616" y="228" width="100" height="40" className="nb nl"/><text x="666" y="245" textAnchor="middle" className="lt">📄 PA Document</text><text x="666" y="260" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
 
-              {/* ── ROW 5: BILLS ── */}
-              <line x1="140" y1="314" x2="178" y2="314" className="fl"/><line x1="140" y1="314" x2="178" y2="314" className="fa" style={{animationDelay:"0.3s"}}/>
-              <line x1="272" y1="314" x2="310" y2="314" className="fl"/><line x1="272" y1="314" x2="310" y2="314" className="fa" style={{animationDelay:"0.6s"}}/>
-              <line x1="404" y1="314" x2="442" y2="314" className="fl"/><line x1="404" y1="314" x2="442" y2="314" className="fa" style={{animationDelay:"0.9s"}}/>
-              <line x1="536" y1="314" x2="574" y2="314" className="fl"/><line x1="536" y1="314" x2="574" y2="314" className="fa" style={{animationDelay:"1.2s"}}/>
-              <line x1="668" y1="314" x2="706" y2="314" className="fl"/><line x1="668" y1="314" x2="706" y2="314" className="fa" style={{animationDelay:"1.5s"}}/>
-              <line x1="800" y1="314" x2="838" y2="314" className="fl"/>
+              {/* ── ROW 5: MOVE-IN ── */}
+              {/* Inventory → Council Tax → Energy → Water → BB:BT → BB:Hyper → TV Licence → Handover → Maintenance → Handoff → Team */}
+              <line x1="93" y1="314" x2="115" y2="314" className="fl"/><line x1="93" y1="314" x2="115" y2="314" className="fa" style={{animationDelay:"0.2s"}}/>
+              <line x1="195" y1="314" x2="217" y2="314" className="fl"/><line x1="195" y1="314" x2="217" y2="314" className="fa" style={{animationDelay:"0.4s"}}/>
+              <line x1="297" y1="314" x2="319" y2="314" className="fl"/><line x1="297" y1="314" x2="319" y2="314" className="fa" style={{animationDelay:"0.6s"}}/>
+              <line x1="399" y1="314" x2="421" y2="314" className="fl"/><line x1="399" y1="314" x2="421" y2="314" className="fa" style={{animationDelay:"0.8s"}}/>
+              <line x1="501" y1="314" x2="523" y2="314" className="fl"/><line x1="501" y1="314" x2="523" y2="314" className="fa" style={{animationDelay:"1.0s"}}/>
+              <line x1="603" y1="314" x2="625" y2="314" className="fl"/><line x1="603" y1="314" x2="625" y2="314" className="fa" style={{animationDelay:"1.2s"}}/>
+              <line x1="705" y1="314" x2="727" y2="314" className="fl"/><line x1="705" y1="314" x2="727" y2="314" className="fa" style={{animationDelay:"1.4s"}}/>
+              <line x1="807" y1="314" x2="829" y2="314" className="fl"/><line x1="807" y1="314" x2="829" y2="314" className="fa" style={{animationDelay:"1.6s"}}/>
 
-              <rect x="40" y="294" width="100" height="40" className="nb nl"/><text x="90" y="311" textAnchor="middle" className="lt">🏛 Council Tax</text><text x="90" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="178" y="294" width="94" height="40" className="nb nl"/><text x="225" y="311" textAnchor="middle" className="lt">⚡ OVO Energy</text><text x="225" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="310" y="294" width="94" height="40" className="nb nl"/><text x="357" y="311" textAnchor="middle" className="lt">🐙 Octopus</text><text x="357" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="442" y="294" width="94" height="40" className="nb nl"/><text x="489" y="311" textAnchor="middle" className="lt">💧 Water</text><text x="489" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="574" y="294" width="94" height="40" className="nb nl"/><text x="621" y="311" textAnchor="middle" className="lt">📡 BB: BT</text><text x="621" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="706" y="294" width="94" height="40" className="nb nl"/><text x="753" y="311" textAnchor="middle" className="lt">📡 BB: Hyper</text><text x="753" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="838" y="294" width="94" height="40" className="nb nl"/><text x="885" y="311" textAnchor="middle" className="lt">📺 TV Licence</text><text x="885" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="13" y="294" width="80" height="40" className="nb nl"/><text x="53" y="311" textAnchor="middle" className="lt">📷 Inventory</text><text x="53" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="115" y="294" width="80" height="40" className="nb nl"/><text x="155" y="311" textAnchor="middle" className="lt">🏛 Council</text><text x="155" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="217" y="294" width="80" height="40" className="nb nl"/><text x="257" y="311" textAnchor="middle" className="lt">⚡ Energy</text><text x="257" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="319" y="294" width="80" height="40" className="nb nl"/><text x="359" y="311" textAnchor="middle" className="lt">💧 Water</text><text x="359" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="421" y="294" width="80" height="40" className="nb nl"/><text x="461" y="311" textAnchor="middle" className="lt">📡 BB:BT</text><text x="461" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="523" y="294" width="80" height="40" className="nb nl"/><text x="563" y="311" textAnchor="middle" className="lt">📡 BB:Hyper</text><text x="563" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="625" y="294" width="80" height="40" className="nb nl"/><text x="665" y="311" textAnchor="middle" className="lt">📺 TV Licence</text><text x="665" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="727" y="294" width="80" height="40" className="nb nl"/><text x="767" y="311" textAnchor="middle" className="lt">📦 Handover</text><text x="767" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="829" y="294" width="80" height="40" className="nb nl"/><text x="869" y="311" textAnchor="middle" className="lt">🔧 Maint.</text><text x="869" y="326" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <line x1="909" y1="314" x2="920" y2="314" className="fl"/>
+              <rect x="920" y="300" width="34" height="28" className="nb nl"/><text x="937" y="316" textAnchor="middle" className="lt" style={{fontSize:"7px"}}>🚪</text>
+              <rect x="920" y="330" width="34" height="24" className="nb ne"/><text x="937" y="345" textAnchor="middle" className="ls">👥 Team</text>
 
               {/* ── ROW 6: COMMISSION ── */}
-              <line x1="140" y1="380" x2="178" y2="380" className="fl"/><line x1="140" y1="380" x2="178" y2="380" className="fa" style={{animationDelay:"0.4s"}}/>
-              <line x1="272" y1="380" x2="310" y2="380" className="fl"/><line x1="272" y1="380" x2="310" y2="380" className="fa" style={{animationDelay:"0.8s"}}/>
-              <line x1="404" y1="380" x2="442" y2="380" className="fl"/>
+              <line x1="148" y1="380" x2="190" y2="380" className="fl"/><line x1="148" y1="380" x2="190" y2="380" className="fa" style={{animationDelay:"0.4s"}}/>
+              <line x1="290" y1="380" x2="332" y2="380" className="fl"/><line x1="290" y1="380" x2="332" y2="380" className="fa" style={{animationDelay:"0.8s"}}/>
+              <line x1="432" y1="380" x2="474" y2="380" className="fl"/>
 
-              <rect x="40" y="360" width="100" height="40" className="nb nl"/><text x="90" y="377" textAnchor="middle" className="lt">💵 Commission</text><text x="90" y="392" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="178" y="360" width="94" height="40" className="nb nl"/><text x="225" y="377" textAnchor="middle" className="lt">🚨 Comm Alert</text><text x="225" y="392" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="310" y="360" width="94" height="40" className="nb nl"/><text x="357" y="377" textAnchor="middle" className="lt">📊 Reconciliation</text><text x="357" y="392" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="442" y="360" width="82" height="40" className="nb ne"/><text x="483" y="380" textAnchor="middle" className="li">📊</text><text x="483" y="392" textAnchor="middle" className="ls">Google Sheets</text>
+              <rect x="40" y="360" width="108" height="40" className="nb nl"/><text x="94" y="377" textAnchor="middle" className="lt">💵 Commission</text><text x="94" y="392" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="190" y="360" width="100" height="40" className="nb nl"/><text x="240" y="377" textAnchor="middle" className="lt">🚨 Comm Alert</text><text x="240" y="392" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="332" y="360" width="100" height="40" className="nb nl"/><text x="382" y="377" textAnchor="middle" className="lt">📊 Reconciliation</text><text x="382" y="392" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="474" y="360" width="82" height="40" className="nb ne"/><text x="515" y="380" textAnchor="middle" className="li">📊</text><text x="515" y="392" textAnchor="middle" className="ls">Google Sheets</text>
 
               {/* ── ROW 7: SUPPORT + MONITORING ── */}
-              <rect x="40" y="426" width="94" height="40" className="nb nl"/><text x="87" y="443" textAnchor="middle" className="lt">🔍 Audit</text><text x="87" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="150" y="426" width="94" height="40" className="nb nl"/><text x="197" y="443" textAnchor="middle" className="lt">🛠 Debug</text><text x="197" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="260" y="426" width="94" height="40" className="nb nl"/><text x="307" y="443" textAnchor="middle" className="lt">🔘 Bot Toggle</text><text x="307" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="370" y="426" width="94" height="40" className="nb nl"/><text x="417" y="443" textAnchor="middle" className="lt">🌅 Briefing</text><text x="417" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="480" y="426" width="94" height="40" className="nb nl"/><text x="527" y="443" textAnchor="middle" className="lt">👁 Silent Bot</text><text x="527" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
-              <rect x="590" y="426" width="94" height="40" className="nb nl"/><text x="637" y="443" textAnchor="middle" className="lt">🏛 Council Map</text><text x="637" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="40" y="426" width="94" height="40" className="nb nl" style={{stroke:"#f5b73180"}}><title>Approval gateway</title></rect><text x="87" y="443" textAnchor="middle" className="lt">🔔 Notify Hub</text><text x="87" y="458" textAnchor="middle" className="ls" style={{fill:"#f5b731"}}>GATE</text>
+              <rect x="150" y="426" width="82" height="40" className="nb nl"/><text x="191" y="443" textAnchor="middle" className="lt">🔍 Audit</text><text x="191" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="248" y="426" width="82" height="40" className="nb nl"/><text x="289" y="443" textAnchor="middle" className="lt">🛠 Debug</text><text x="289" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="346" y="426" width="82" height="40" className="nb nl"/><text x="387" y="443" textAnchor="middle" className="lt">🔘 Bot Toggle</text><text x="387" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="444" y="426" width="82" height="40" className="nb nl"/><text x="485" y="443" textAnchor="middle" className="lt">🌅 Briefing</text><text x="485" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="542" y="426" width="82" height="40" className="nb nl"/><text x="583" y="443" textAnchor="middle" className="lt">👁 Silent Bot</text><text x="583" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="640" y="426" width="82" height="40" className="nb nl"/><text x="681" y="443" textAnchor="middle" className="lt">⏱ Stuck Alert</text><text x="681" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="738" y="426" width="82" height="40" className="nb nl"/><text x="779" y="443" textAnchor="middle" className="lt">📢 Non-IQ</text><text x="779" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
+              <rect x="836" y="426" width="82" height="40" className="nb nl"/><text x="877" y="443" textAnchor="middle" className="lt">📚 Provider KB</text><text x="877" y="458" textAnchor="middle" className="ls" style={{fill:"#2dd4a0"}}>LIVE</text>
 
               {/* ── ANIMATED DOTS ── */}
               {[0,1,2,3,4].map(function(i){
                 return <circle key={i} r="3" fill="#2dd4a0" style={{opacity:0.7,animation:"pulse2 2s ease-in-out infinite",animationDelay:i*0.8+"s"}}>
-                  <animateMotion dur={8+i*0.5+"s"} repeatCount="indefinite" path="M39,50 L150,50 L280,50 L410,50 L540,50 L670,50 L800,50 L800,116 L670,116 L540,116 L410,116 L280,116 L90,116 L90,182 L280,182 L410,182 L90,248 L225,248 L357,248 L489,248 L90,314 L225,314 L357,314 L489,314 L621,314"/>
+                  <animateMotion dur={10+i*0.5+"s"} repeatCount="indefinite" path="M39,50 L163,50 L313,50 L463,50 L94,116 L313,116 L463,116 L613,116 L94,182 L313,182 L463,182 L613,182 L94,248 L240,248 L382,248 L524,248 L666,248 L53,314 L155,314 L257,314 L359,314 L461,314 L563,314 L665,314 L767,314 L869,314"/>
                 </circle>
               })}
             </svg>
           </div>
           <div style={{marginTop:8,display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
-            {[["🟢 LIVE (36 agents)","#2dd4a0"],["🟡 GATE (approval hub)","#f5b731"],["🟦 External","#30d5e8"],["→ Data Flow","#2dd4a080"]].map(function(x,i){
+            {[["🟢 LIVE — 36 agents","#2dd4a0"],["🟡 GATE — approval hub","#f5b731"],["🟦 External — LINE · Sheets","#30d5e8"],["→ Animated data flow","#2dd4a080"]].map(function(x,i){
               return <span key={i} style={{fontSize:9,color:x[1]}}>{x[0]}</span>
             })}
           </div>
